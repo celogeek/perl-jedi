@@ -1,6 +1,6 @@
 package Jedi::App;
 
-# ABSTRACT : Jedi App
+# ABSTRACT: Jedi App
 
 =head1 DESCRIPTION
 
@@ -64,6 +64,9 @@ And also the regexp works
 
 use strict;
 use warnings;
+
+# VERSION
+
 use Import::Into;
 use Module::Runtime qw/use_module/;
 
