@@ -122,7 +122,7 @@ You receive:
 has 'cookies' => (is => 'lazy');
 sub _build_cookies {
 	my ($self) = @_;
-	return CGI::Cookie::XS->parse($self->env->{HTTP_COOKIE} // '') // {};
+	return CGI::Cookie::XS->parse($self->env->{HTTP_COOKIE} // '');
 }
 
 has '_body' => (is => 'lazy');
