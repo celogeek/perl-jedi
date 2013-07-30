@@ -14,6 +14,7 @@ use Moo;
 
 # VERSION
 
+use HTTP::Body;
 use CGI::Deurl::XS 'parse_query_string';
 use CGI::Cookie::XS;
 
@@ -54,7 +55,28 @@ You receive:
 has 'params' => (is => 'lazy');
 sub _build_params {
 	my ($self) = @_;
-	return parse_query_string($self->env->{QUERY_STRING}) // {};
+	my $method = $self->env->{REQUEST_METHOD};
+	if ($method eq 'POST' || $method eq 'PUT') {
+		return $self->_body->param;
+	} else {
+		return parse_query_string($self->env->{QUERY_STRING}) // {};
+	}
+}
+
+=attr uploads
+
+Return the file uploads
+
+=cut
+has 'uploads' => (is => 'lazy');
+sub _build_uploads {
+	my ($self) = @_;
+	my $method = $self->env->{REQUEST_METHOD};
+	if ($method eq 'POST' || $method eq 'PUT') {
+		return $self->_body->upload;
+	} else {
+		return {};
+	}
 }
 
 =attr cookies
@@ -76,5 +98,24 @@ has 'cookies' => (is => 'lazy');
 sub _build_cookies {
 	my ($self) = @_;
 	return CGI::Cookie::XS->parse($self->env->{HTTP_COOKIE}) // {};
+}
+
+has '_body' => (is => 'lazy');
+sub _build__body {
+	my ($self) = @_;
+	
+	my $type = $self->env->{'CONTENT_TYPE'} // '';
+	my $length = $self->env->{'CONTENT_LENGTH'} // 0;
+	my $io = $self->env->{'psgi.input'} // $self->env->{'PSGI.INPUT'};
+	my $body = HTTP::Body->new($type, $length);
+	$body->cleanup(1);
+
+	while(defined $io && $length) {
+        $io->read( my $buffer, ( $length < 8192 ) ? $length : 8192 );
+        $length -= length($buffer);
+        $body->add($buffer);
+	}
+
+	return $body;
 }
 1;
