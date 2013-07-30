@@ -26,9 +26,9 @@ has '_jedi_missing' => (is => 'ro', default => sub {[]});
 
 sub _jedi_routes_push {
 	my ($self, $which, $path, $sub) = @_;
-	croak "bad method : GET/POST/PUT/DELETE" if $which !~ /^(?:GET|POST|PUT|DELETE)/x;
-	croak "path incorrect !" if !defined $path;
-	croak "sub incorrect !" if ref $sub ne 'CODE';
+	croak "method invalid : only support GET/POST/PUT/DELETE !" if $which !~ /^(?:GET|POST|PUT|DELETE)/x;
+	croak "path invalid !" if !defined $path;
+	croak "sub invalid !" if ref $sub ne 'CODE';
 	$path = $path->full_path if ref $path ne 'Regexp';
 	push @{$self->_jedi_routes->{$which}}, [$path, $sub];
 	return;
@@ -113,7 +113,7 @@ If no route matches, all the missing method is executed.
 =cut
 sub missing {
 	my ($self, $sub) = @_;
-	croak "sub incorrect !" if ref $sub ne 'CODE';
+	croak "sub invalid !" if ref $sub ne 'CODE';
 
 	push(@{$self->_jedi_missing}, $sub);
 	return;
