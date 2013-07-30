@@ -129,6 +129,29 @@ test_psgi $jedi->start, sub {
 		is $res->content, '', '... and tiny content is correct';
 	}
 
+	{
+		#Test cookies
+		my $res = $cb->(GET '/cookie');
+		is $res->code, 200, 'status is correct';
+		is $res->content, '{}', '... and content is correct';
+
+	}
+
+	{
+		#Test cookies
+		my $res = $cb->(GET '/cookie', 'Cookie' => 'a=1');
+		is $res->code, 200, 'status is correct';
+		is_deeply from_json($res->content), { a => [1] }, '... and content is correct';
+
+	}
+
+	{
+		#Test cookies
+		my $res = $cb->(GET '/cookie', 'Cookie' => 'a=1&2; b=1');
+		is $res->code, 200, 'status is correct';
+		is_deeply from_json($res->content), { a => [1,2], b => [1] }, '... and content is correct';
+
+	}
 };
 
 done_testing;

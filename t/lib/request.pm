@@ -13,6 +13,8 @@ sub jedi_app {
 	$jedi->get('/file', $jedi->can('handle_uploads'));
 	$jedi->post('/file', $jedi->can('handle_uploads'));
 	$jedi->put('/file', $jedi->can('handle_uploads'));
+
+	$jedi->get('/cookie', $jedi->can('handle_cookies'));
 }
 
 sub handle_params {
@@ -35,4 +37,10 @@ sub handle_uploads {
 	return 1;		
 }
 
+sub handle_cookies {
+	my ($jedi, $request, $response) = @_;
+	my $cookies = $request->cookies;
+	$response->status(200);
+	$response->body(to_json($cookies));	
+}
 1;
