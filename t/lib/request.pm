@@ -11,6 +11,7 @@ sub jedi_app {
 
 	$jedi->get('/file', $jedi->can('handle_uploads'));
 	$jedi->post('/file', $jedi->can('handle_uploads'));
+	$jedi->put('/file', $jedi->can('handle_uploads'));
 }
 
 sub handle_params {

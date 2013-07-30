@@ -74,6 +74,33 @@ test_psgi $jedi->start, sub {
 		is $res->content, join("\n", map {"Hello World !"} (1..650)) . "\n", '... and big content is correct';
 	}
 
+	{
+		my $req = POST '/file', 
+			Content_Type => 'form-data',
+			Content => [
+				myTestFile => [$Bin . "/../data/hello_world.txt"],
+		];
+		$req->method('PUT');
+		# post the file, and get it back through content
+		my $res = $cb->($req
+		);
+		is $res->code, 200, 'status is correct';
+		is $res->content, 'Hello World !', '... and tiny content is correct';
+	}
+
+	{
+		my $req = POST '/file', 
+			Content_Type => 'form-data',
+			Content => [
+				myTestFile => [$Bin . "/../data/hello_world_big.txt"],
+		];
+		$req->method('PUT');
+		# post the file, and get it back through content
+		my $res = $cb->($req);
+		is $res->code, 200, 'status is correct';
+		is $res->content, join("\n", map {"Hello World !"} (1..650)) . "\n", '... and big content is correct';
+	}
+
 };
 
 done_testing;
