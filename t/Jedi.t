@@ -49,4 +49,10 @@ test_psgi $jedi_admin->start, sub {
 	}
 };
 
+my $jedi_bad_app = Jedi->new;
+eval {
+	$jedi_bad_app->road('/', 't::lib::badapp');
+};
+like $@, qr{t::lib::badapp is not a jedi app}, 'badapp is not a jedi app';
+
 done_testing;
