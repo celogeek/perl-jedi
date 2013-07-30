@@ -145,4 +145,17 @@ use Jedi;
 	}
 }
 
+{
+	my $jedi = Jedi->new;
+	$jedi->road('/', 't::lib::err404');
+	test_psgi $jedi->start, sub {
+		my ($cb) = shift;
+		{
+			my $res = $cb->(GET '/');
+			is $res->code, 404, 'route is correct';
+			is $res->content, 'err404', '... and body set';
+		}
+	}
+}
+
 done_testing;
