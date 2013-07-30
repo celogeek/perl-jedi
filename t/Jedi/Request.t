@@ -59,7 +59,19 @@ test_psgi $jedi->start, sub {
 			]
 		);
 		is $res->code, 200, 'status is correct';
-		is $res->content, 'Hello World !';
+		is $res->content, 'Hello World !', '... and tiny content is correct';
+	}
+
+	{
+		# post the file, and get it back through content
+		my $res = $cb->(POST '/file', 
+			Content_Type => 'form-data',
+			Content => [
+				myTestFile => [$Bin . "/../data/hello_world_big.txt"],
+			]
+		);
+		is $res->code, 200, 'status is correct';
+		is $res->content, join("\n", map {"Hello World !"} (1..650)) . "\n", '... and big content is correct';
 	}
 
 };
