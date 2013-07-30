@@ -37,7 +37,11 @@ has 'path' => (is => 'ro', required => 1);
 
 =attr params
 
-Parsing of the QUERY_STRING. It always return an HASH, with:
+If method is POST or PUT, it will parse the body, and extract the params.
+
+Otherwise it parse the QUERY_STRING.
+
+It always return an HASH, with:
 
 	key => Scalar // [ARRAY of Values]
 
@@ -65,7 +69,28 @@ sub _build_params {
 
 =attr uploads
 
-Return the file uploads
+Return the file uploads.
+
+For a request like test@test.txt, the form is : 
+
+   	test => {
+	    filename   "test.txt",
+        headers    {
+            Content-Disposition   "form-data; name="test"; filename="test.txt"",
+            Content-Type          "text/plain"
+        },
+        name       "test",
+        size       13,
+        tempname   "/var/folders/_1/097rrrdd2s5dwqgd7hp6nlx00000gn/T/X4me5HO7L_.txt"
+   	}
+
+Ex with curl :
+	
+	curl -F 'test@test.txt' http://localhost:5000/post
+
+You can read then the tempname file to get the content. When the request is sent back, the file is automatically removed.
+
+See <HTTP::Body> for more details.
 
 =cut
 has 'uploads' => (is => 'lazy');
