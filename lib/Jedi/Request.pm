@@ -18,6 +18,13 @@ use HTTP::Body;
 use CGI::Deurl::XS 'parse_query_string';
 use CGI::Cookie::XS;
 
+=attr jedi_env
+
+The environment of jedi apps
+
+=cut
+has 'jedi_env' => (is => 'ro', default => sub {'development'});
+
 =attr env
 
 The environment variable, as it received from PSGI
