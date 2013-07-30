@@ -129,13 +129,13 @@ has '_body' => (is => 'lazy');
 sub _build__body {
 	my ($self) = @_;
 	
-	my $type = $self->env->{'CONTENT_TYPE'} // '';
-	my $length = $self->env->{'CONTENT_LENGTH'} // 0;
-	my $io = $self->env->{'psgi.input'} // $self->env->{'PSGI.INPUT'};
+	my $type = $self->env->{'CONTENT_TYPE'} || '';
+	my $length = $self->env->{'CONTENT_LENGTH'} || 0;
+	my $io = $self->env->{'psgi.input'};
 	my $body = HTTP::Body->new($type, $length);
 	$body->cleanup(1);
 
-	while(defined $io && $length) {
+	while($length) {
         $io->read( my $buffer, ( $length < 8192 ) ? $length : 8192 );
         $length -= length($buffer);
         $body->add($buffer);
