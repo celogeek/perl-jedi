@@ -136,6 +136,7 @@ sub response {
 	my $path = $request->path;
 	my $routes = $self->_jedi_routes->{$request->env->{REQUEST_METHOD}};
 	my $methods = [];
+	
 	if (ref $routes eq 'ARRAY') {
 		for my $route_def(@$routes) {
 			my ($route, $sub) = @$route_def;

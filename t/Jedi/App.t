@@ -67,12 +67,22 @@ use Jedi;
 			/test/me?a=1
 		}
 		) {
-			my $res = $cb->(GET $p);
-			is $res->code, 200, 'missing status is correct';
 			my $r = $p;
 			$r =~ s/\?.*//;
 			$r .= '/';
-			is $res->content, 'missing : ' . $r, '... and also the content';
+
+			{
+				my $res = $cb->(GET $p);
+				is $res->code, 200, 'missing status is correct';
+				is $res->content, 'missing : ' . $r, '... and also the content';
+			}
+
+			{
+				my $res = $cb->(HTTP::Request->new('UNK', $p));
+				is $res->code, 200, 'missing status is correct';
+				is $res->content, 'missing : ' . $r, '... and also the content';
+			}
+
 		}
 	};
 }
