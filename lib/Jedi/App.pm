@@ -81,11 +81,9 @@ This module is equivalent into your package to :
 
 =cut
 sub import {
-	my ($class) = @_;
 	my $target = caller;
 	use_module('Moo')->import::into($target);
 	$target->can('with')->('Jedi::Role::App');
-
 	return;
 }
 

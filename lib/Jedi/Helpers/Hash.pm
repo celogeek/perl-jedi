@@ -19,7 +19,6 @@ Equivalent in your module to :
 =cut
 
 sub import {
-	my ($class) = @_;
 	my $target = caller;
 	use_module('autobox')->import::into($target, HASH => __PACKAGE__);
 	return;
