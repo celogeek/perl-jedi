@@ -11,6 +11,9 @@ You can get data from it, to generate your response
 =cut
 
 use Moo;
+
+# VERSION
+
 use CGI::Deurl::XS 'parse_query_string';
 use CGI::Cookie::XS;
 
