@@ -130,4 +130,19 @@ use Jedi;
 
 }
 
+{
+	my $jedi = Jedi->new;
+	$jedi->road('/', 't::lib::multipleheaders');
+	test_psgi $jedi->start, sub {
+		my ($cb) = shift;
+		{
+			my $res = $cb->(GET '/');
+			is $res->code, 200, 'route is correct';
+			is $res->content, 'OK', '... and body set';
+			my @h = $res->header('test');
+			is_deeply \@h, [1, 2], '... and headers is correct';
+		}
+	}
+}
+
 done_testing;
