@@ -115,10 +115,8 @@ sub response {
 		$self->_jedi_roads_is_sorted(1);
 		@$sorted_roads = sort { length($b->[0]) <=> length($a->[0]) } @$sorted_roads;
 	}
-	return Jedi::Response->new(code => 500, body => 'No road found !') if !scalar(@$sorted_roads);
 
 	my $path_info = $env->{PATH_INFO}->full_path();
-
 	my $response = Jedi::Response->new();
 
 	for my $road_def(@$sorted_roads) {
@@ -128,7 +126,7 @@ sub response {
 		}
 	}
 
-	return $response;
+	return Jedi::Response->new(status => 500, body => 'No road found !');
 }
 
 =method start
