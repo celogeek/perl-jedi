@@ -8,6 +8,7 @@ sub jedi_app {
 
 	$jedi->get('/', $jedi->can('handle_params'));
 	$jedi->post('/', $jedi->can('handle_params'));
+	$jedi->put('/', $jedi->can('handle_params'));
 
 	$jedi->get('/file', $jedi->can('handle_uploads'));
 	$jedi->post('/file', $jedi->can('handle_uploads'));

@@ -36,6 +36,21 @@ test_psgi $jedi->start, sub {
 	}
 
 	{
+		my $res = $cb->(PUT '/?a=1&a=2&b=1');
+		is $res->code, 200, 'status is correct';
+		is_deeply from_json($res->content), {}, '... and params is empty (not a post)';
+	}
+
+	{
+		my $req = POST '/', [a => 1, a => 2, b => 1];
+		$req->method('PUT');
+
+		my $res = $cb->($req);
+		is $res->code, 200, 'status is correct';
+		is_deeply from_json($res->content), {a => [1,2], b => 1}, '... and params is correct';
+	}
+
+	{
 		# do a POST request, with GET (post file into the content)
 		my $req = POST '/file', 
 			Content_Type => 'form-data',
