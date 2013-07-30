@@ -4,6 +4,7 @@ use HTTP::Request::Common;
 use Plack::Test;
 use Jedi;
 use JSON;
+use FindBin qw/$Bin/;
 
 my $jedi = Jedi->new();
 $jedi->road('/', 't::lib::request');
@@ -33,6 +34,34 @@ test_psgi $jedi->start, sub {
 		is $res->code, 200, 'status is correct';
 		is_deeply from_json($res->content), {a => [1,2], b => 1}, '... and params is correct';
 	}
+
+	{
+		# do a POST request, with GET (post file into the content)
+		my $req = POST '/file', 
+			Content_Type => 'form-data',
+			Content => [
+				myTestFile => [$Bin . "/../data/hello_world.txt"],
+			];
+		$req->method('GET');
+
+		my $res = $cb->($req);
+		is $res->code, 200, 'status is correct';
+		is $res->content, '';
+	}
+
+
+	{
+		# post the file, and get it back through content
+		my $res = $cb->(POST '/file', 
+			Content_Type => 'form-data',
+			Content => [
+				myTestFile => [$Bin . "/../data/hello_world.txt"],
+			]
+		);
+		is $res->code, 200, 'status is correct';
+		is $res->content, 'Hello World !';
+	}
+
 };
 
 done_testing;
