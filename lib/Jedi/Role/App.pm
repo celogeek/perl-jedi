@@ -26,11 +26,12 @@ has '_jedi_missing' => (is => 'ro', default => sub {[]});
 
 sub _jedi_routes_push {
 	my ($self, $which, $path, $sub) = @_;
-	croak "bad method : GET/POST/PUT/DELETE" if $which !~ /^(?:GET|POST|PUT|DELETE)/;
+	croak "bad method : GET/POST/PUT/DELETE" if $which !~ /^(?:GET|POST|PUT|DELETE)/x;
 	croak "path incorrect !" if !defined $path;
 	croak "sub incorrect !" if ref $sub ne 'CODE';
 	$path = $path->full_path if ref $path ne 'Regexp';
 	push @{$self->_jedi_routes->{$which}}, [$path, $sub];
+	return;
 }
 
 =head1 ROUTES
@@ -61,7 +62,10 @@ Define a GET method.
 	$jedi->get("/", sub{...});
 
 =cut
-sub get  { shift->_jedi_routes_push('GET', @_) }
+sub get  { 
+	my ($self, $path, $sub) = @_;
+	return $self->_jedi_routes_push('GET', $path, $sub);
+}
 
 =method post
 
@@ -70,7 +74,10 @@ Define a POST method.
 	$jedi->post("/", sub{...});
 
 =cut
-sub post { shift->_jedi_routes_push('POST', @_) }
+sub post { 	
+	my ($self, $path, $sub) = @_;
+	return $self->_jedi_routes_push('POST', $path, $sub);
+}
 
 =method put
 
@@ -79,7 +86,10 @@ Define a PUT method.
 	$jedi->put("/", sub{...});
 
 =cut
-sub put  { shift->_jedi_routes_push('PUT', @_) }
+sub put  {
+	my ($self, $path, $sub) = @_;
+	return $self->_jedi_routes_push('PUT', $path, $sub);
+}
 
 =method del
 
@@ -88,7 +98,11 @@ Define a DEL method.
 	$jedi->del("/", sub{...});
 
 =cut
-sub del { shift->_jedi_routes_push('DELETE', @_) }
+sub del {
+	my ($self, $path, $sub) = @_;
+	return $self->_jedi_routes_push('DELETE', $path, $sub);
+}
+
 
 =method missing
 
@@ -102,6 +116,7 @@ sub missing {
 	croak "sub incorrect !" if ref $sub ne 'CODE';
 
 	push(@{$self->_jedi_missing}, $sub);
+	return;
 }
 
 =method response

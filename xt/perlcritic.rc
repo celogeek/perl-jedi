@@ -7,8 +7,10 @@ color           = 1
 allow-unsafe    = 1
 
 [TestingAndDebugging::RequireUseStrict]
-equivalent_modules = Moo Jedi::App
+equivalent_modules = Moo Moo::Role Jedi::App
 
 [TestingAndDebugging::RequireUseWarnings]
-equivalent_modules = Moo Jedi::App
+equivalent_modules = Moo Moo::Role Jedi::App
 
+[Subroutines::ProhibitUnusedPrivateSubroutines]
+allow = _build_params _build_cookies
