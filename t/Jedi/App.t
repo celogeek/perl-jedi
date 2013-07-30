@@ -87,4 +87,47 @@ use Jedi;
 	};
 }
 
+{
+	my $jedi = Jedi->new;
+	$jedi->road('/', 't::lib::stop');
+	test_psgi $jedi->start, sub {
+		my ($cb) = shift;
+		{
+			my $res = $cb->(GET '/');
+			is $res->code, 302, 'route is correct';
+			is $res->content, '', '... and no body set';
+			is $res->header('Location'), 'http://blog.celogeek.com' , '... and redirect init';
+		}
+	}
+}
+
+{
+	my $jedi = Jedi->new;
+	$jedi->road('/', 't::lib::othermethod');
+	test_psgi $jedi->start, sub {
+		my ($cb) = shift;
+		{
+			my $res = $cb->(GET '/');
+			is $res->code, 200, 'route is correct';
+			is $res->content, 'GET', '... and no body set';
+		}
+		{
+			my $res = $cb->(POST '/');
+			is $res->code, 200, 'route is correct';
+			is $res->content, 'POST', '... and no body set';
+		}
+		{
+			my $res = $cb->(PUT '/');
+			is $res->code, 200, 'route is correct';
+			is $res->content, 'PUT', '... and no body set';
+		}
+		{
+			my $res = $cb->(HTTP::Request->new('DELETE', '/'));
+			is $res->code, 200, 'route is correct';
+			is $res->content, 'DELETE', '... and no body set';
+		}
+	}
+
+}
+
 done_testing;
