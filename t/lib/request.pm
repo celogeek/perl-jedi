@@ -17,6 +17,10 @@ sub jedi_app {
 	$jedi->get('/cookie', $jedi->can('handle_cookies'));
 
 	$jedi->get('/jedi_env', $jedi->can('handle_jedi_env'));
+
+	$jedi->get('/scheme', $jedi->can('handle_scheme'));
+	$jedi->get('/host', $jedi->can('handle_host'));
+	$jedi->get('/port', $jedi->can('handle_port'));
 }
 
 sub handle_params {
@@ -53,4 +57,26 @@ sub handle_jedi_env {
 	$response->body($request->jedi_env);
 	return 1;
 }
+
+sub handle_scheme {
+	my ($jedi, $request, $response) = @_;
+	$response->status(200);
+	$response->body($request->scheme);
+	return 1;
+}
+
+sub handle_host {
+	my ($jedi, $request, $response) = @_;
+	$response->status(200);
+	$response->body($request->host);
+	return 1;
+}
+
+sub handle_port {
+	my ($jedi, $request, $response) = @_;
+	$response->status(200);
+	$response->body($request->port);
+	return 1;
+}
+
 1;
