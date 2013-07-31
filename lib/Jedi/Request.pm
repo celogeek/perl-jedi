@@ -150,4 +150,51 @@ sub _build__body {
 
 	return $body;
 }
+
+=method scheme
+
+Return the scheme from proxied proto or main proto
+
+=cut
+sub scheme {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	return 
+	       $env->{'X_FORWARDED_PROTOCOL'}
+        || $env->{'HTTP_X_FORWARDED_PROTOCOL'}
+        || $env->{'HTTP_X_FORWARDED_PROTO'}
+        || $env->{'HTTP_FORWARDED_PROTO'}
+      	|| $env->{'psgi.url_scheme'}
+      	|| $env->{'PSGI.URL_SCHEME'}
+      	|| '';
+}
+
+=method port
+
+Return server port
+
+=cut
+sub port {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	return $env->{SERVER_PORT};	
+}
+
+=method host
+
+Return the proxied host or the main host
+
+=cut
+sub host {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	return
+	   $env->{HTTP_X_FORWARDED_HOST}
+	|| $env->{X_FORWARDED_HOST}
+	|| $env->{HTTP_HOST}
+	|| '';
+}
 1;
