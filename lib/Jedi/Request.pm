@@ -179,7 +179,7 @@ sub port {
 	my ($self) = @_;
 	my $env = $self->env;
 
-	return $env->{SERVER_PORT};	
+	return $env->{'SERVER_PORT'};	
 }
 
 =method host
@@ -192,9 +192,9 @@ sub host {
 	my $env = $self->env;
 
 	return
-	   $env->{HTTP_X_FORWARDED_HOST}
-	|| $env->{X_FORWARDED_HOST}
-	|| $env->{HTTP_HOST}
+	   $env->{'HTTP_X_FORWARDED_HOST'}
+	|| $env->{'X_FORWARDED_HOST'}
+	|| $env->{'HTTP_HOST'}
 	|| '';
 }
 1;

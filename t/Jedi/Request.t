@@ -184,4 +184,29 @@ test_psgi $jedi->start, sub {
 	}
 }
 
+{
+	# test scheme/port/env
+	test_psgi $jedi->start, sub {
+		my ($cb) = @_;
+		{
+			my $req = GET 'http://sck.to/scheme';
+			my $res = $cb->($req);
+			is $res->code, 200, 'status is correct';
+			is_deeply $res->content, 'http', '... and content is correct';
+		}
+		{
+			my $req = GET 'http://sck.to/port';
+			my $res = $cb->($req);
+			is $res->code, 200, 'status is correct';
+			is_deeply $res->content, '80', '... and content is correct';
+		}
+		{
+			my $req = GET 'http://sck.to/host';
+			my $res = $cb->($req);
+			is $res->code, 200, 'status is correct';
+			is_deeply $res->content, 'sck.to', '... and content is correct';
+		}
+	}
+}
+
 done_testing;
