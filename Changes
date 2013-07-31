@@ -1,3 +1,5 @@
+    * Bug #279 : dont use findbin with plack (Celogeek San)
+
 0.06  2013-07-31 20:36:56 GMT
     * Feature #272 : create config attribute into jedi app (Celogeek San)
 
