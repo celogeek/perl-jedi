@@ -14,15 +14,18 @@ You should use the L<Jedi::App> module.
 =cut
 
 use Moo::Role;
-
 # VERSION
-
 use Jedi::Helpers::Scalar;
-
+use CHI;
 use Carp qw/carp croak/;
 
 has '_jedi_routes' => ( is => 'ro', default => sub {{}} );
 has '_jedi_missing' => (is => 'ro', default => sub {[]});
+has '_jedi_routes_cache' => (is => 'lazy', clearer => 1);
+sub _build__jedi_routes_cache {
+	return CHI->new(driver => 'RawMemory', datastore => {}, max_size => 10_000);
+}
+
 
 sub _jedi_routes_push {
 	my ($self, $which, $path, $sub) = @_;
@@ -31,6 +34,7 @@ sub _jedi_routes_push {
 	croak "sub invalid !" if ref $sub ne 'CODE';
 	$path = $path->full_path if ref $path ne 'Regexp';
 	push @{$self->_jedi_routes->{$which}}, [$path, $sub];
+	$self->_clear_jedi_routes_cache;
 	return;
 }
 
@@ -116,6 +120,7 @@ sub missing {
 	croak "sub invalid !" if ref $sub ne 'CODE';
 
 	push(@{$self->_jedi_missing}, $sub);
+	$self->_clear_jedi_routes_cache;
 	return;
 }
 
@@ -135,20 +140,27 @@ sub response {
 
 	my $path = $request->path;
 	my $routes = $self->_jedi_routes->{$request->env->{REQUEST_METHOD}};
-	my $methods = [];
+	my $methods;
 	
-	if (ref $routes eq 'ARRAY') {
-		for my $route_def(@$routes) {
-			my ($route, $sub) = @$route_def;
-			if (ref $route eq 'Regexp') {
-				push @$methods, $sub if $path =~ $route;
-			} else {
-				push @$methods, $sub if $path eq $route->full_path;
+	if (my $cache_routes = $self->_jedi_routes_cache->get($path)) {
+		$methods = $cache_routes;
+	} else {
+		$methods = [];
+		if (ref $routes eq 'ARRAY') {
+			for my $route_def(@$routes) {
+				my ($route, $sub) = @$route_def;
+				if (ref $route eq 'Regexp') {
+					push @$methods, $sub if $path =~ $route;
+				} else {
+					push @$methods, $sub if $path eq $route->full_path;
+				}
 			}
 		}
+	
+		@$methods = @{$self->_jedi_missing} if ! scalar @$methods;
+	
+		$self->_jedi_routes_cache->set($path => $methods);
 	}
-
-	@$methods = @{$self->_jedi_missing} if ! scalar @$methods;
 
 	for my $meth(@$methods) {
 		last if ! $self->$meth($request, $response);
