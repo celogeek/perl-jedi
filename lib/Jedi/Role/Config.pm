@@ -70,7 +70,6 @@ sub _build_jedi_config {
 	my ($self) = @_;
 
 	my $env = $self->jedi_env;
-	FindBin::again();
 
 	my $curdir = dir($Bin);
 	my $main_file = "config";
