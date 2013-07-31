@@ -53,8 +53,9 @@ sub handle_cookies {
 
 sub handle_jedi_env {
 	my ($jedi, $request, $response) = @_;
+	$jedi->clear_jedi_env;
 	$response->status(200);
-	$response->body($request->jedi_env);
+	$response->body($jedi->jedi_env);
 	return 1;
 }
 
