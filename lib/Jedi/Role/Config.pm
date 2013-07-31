@@ -100,3 +100,8 @@ sub _build_jedi_config {
 }
 
 1;
+
+__END__
+=head1 SEE ALSO
+
+L<Config::Any>

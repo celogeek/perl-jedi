@@ -78,6 +78,7 @@ This module is equivalent into your package to :
 	package MyApps;
 	use Moo;
 	with "Jedi::Role::App";
+	with "Jedi::Role::Config";
 
 =cut
 sub import {
@@ -89,3 +90,24 @@ sub import {
 }
 
 1;
+__END__
+
+=head1 OTHER ATTRIBUTES
+
+=head2 jedi_config
+
+You can access to the config from your apps. Use the attribute "jedi_config".
+
+See L<Jedi::Role::Config> for more defails
+
+=head2 jedi_env
+
+You can access to the jedi_env config from your apps. Use the attribute "jedi_env".
+
+See L<Jedi::Role::Config> for more defails
+
+=head1 SEE ALSO
+
+L<Jedi::Role::App>
+
+L<Jedi::Role::Config>
