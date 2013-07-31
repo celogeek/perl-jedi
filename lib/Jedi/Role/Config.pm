@@ -41,17 +41,31 @@ The jedi_config is set to :
 =cut
 
 use Moo::Role;
+# VERSION
 use Path::Class;
 use FindBin qw/$Bin/;
 use Config::Any;
 
+=attr jedi_env
+
+Environment of your jedi app.
+
+It take : JEDI_ENV or PLACK_ENV or set 'development' by default
+
+=cut
 has 'jedi_env' => (is => 'lazy', clearer => 1);
 sub _build_jedi_env {
     return $ENV{'JEDI_ENV'} // $ENV{'PLACK_ENV'} // 'development';
 }
 
-has 'jedi_config' => (is => 'lazy', clearer => 1);
+=attr jedi_config
 
+Load config from current app dir or any subdir above.
+
+It also take 'environments/$JEDI_ENV' file.
+
+=cut
+has 'jedi_config' => (is => 'lazy', clearer => 1);
 sub _build_jedi_config {
 	my ($self) = @_;
 

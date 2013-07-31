@@ -13,23 +13,25 @@ use Module::Runtime qw/use_module/;
 	}, 'dev conf loaded';
 }
 
-{
-	local $ENV{JEDI_ENV} = 'prod';
-	my $indirect = use_module('t::lib::Config::App')->new;
-	is $indirect->jedi_env, 'prod', 'env is now prod';
-	is_deeply $indirect->jedi_config, {
-		direct => 1,
-	}, 'prod conf loaded';
-}
-
-{
-	local $ENV{JEDI_ENV} = 'test';
-	my $indirect = use_module('t::lib::Config::App')->new;
-	is $indirect->jedi_env, 'test', 'env is now prod';
-	is_deeply $indirect->jedi_config, {
-		direct => 1,
-		conf => 'test',
-	}, 'test conf loaded';
+for my $env_name(qw/JEDI_ENV PLACK_ENV/) {
+	{
+		local $ENV{$env_name} = 'prod';
+		my $indirect = use_module('t::lib::Config::App')->new;
+		is $indirect->jedi_env, 'prod', 'env is now prod';
+		is_deeply $indirect->jedi_config, {
+			direct => 1,
+		}, 'prod conf loaded';
+	}
+	
+	{
+		local $ENV{$env_name} = 'test';
+		my $indirect = use_module('t::lib::Config::App')->new;
+		is $indirect->jedi_env, 'test', 'env is now prod';
+		is_deeply $indirect->jedi_config, {
+			direct => 1,
+			conf => 'test',
+		}, 'test conf loaded';
+	}
 }
 
 done_testing;
