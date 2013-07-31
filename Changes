@@ -1,3 +1,5 @@
+    * Feature #276 : add cache for path resolution (Celogeek San)
+
 0.04  2013-07-31 13:00:16 GMT
     * Feature #271 : add scheme, port, host into the request (Celogeek San)
 
