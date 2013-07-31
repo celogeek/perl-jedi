@@ -116,7 +116,6 @@ The response returned is a L<Jedi::Response>, you can call the to_psgi method to
 sub response {
 	my ($self, $env) = @_;
 	
-	my $jedi_env = $ENV{PLACK_ENV} // 'development';
 	my $sorted_roads = $self->_jedi_roads;
 	if (!$self->_jedi_roads_is_sorted) {
 		$self->_jedi_roads_is_sorted(1);
@@ -128,14 +127,14 @@ sub response {
 
 	if (my $road_def = $self->_jedi_roads_cache->get($path_info)) {
 		my ($road, $jedi) = @$road_def;
-		return $jedi->response(Jedi::Request->new(jedi_env => $jedi_env, env => $env, path => $path_info->without_base($road)), $response);
+		return $jedi->response(Jedi::Request->new(env => $env, path => $path_info->without_base($road)), $response);
 	}
 
 	for my $road_def(@$sorted_roads) {
 		my ($road, $jedi) = @$road_def;
 		if ($path_info->start_with($road)) {
 			$self->_jedi_roads_cache->set($path_info => $road_def);
-			return $jedi->response(Jedi::Request->new(jedi_env => $jedi_env, env => $env, path => $path_info->without_base($road)), $response);
+			return $jedi->response(Jedi::Request->new(env => $env, path => $path_info->without_base($road)), $response);
 		}
 	}
 
