@@ -84,6 +84,7 @@ sub import {
 	my $target = caller;
 	use_module('Moo')->import::into($target);
 	$target->can('with')->('Jedi::Role::App');
+	$target->can('with')->('Jedi::Role::Config');
 	return;
 }
 
