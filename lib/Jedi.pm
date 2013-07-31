@@ -67,12 +67,17 @@ use Moo;
 use Jedi::Helpers::Scalar;
 use Jedi::Request;
 use Jedi::Response;
+use CHI;
 
 use Module::Runtime qw/use_module/;
 use Carp qw/croak/;
 
 has '_jedi_roads' => (is => 'ro', default => sub {[]});
 has '_jedi_roads_is_sorted' => (is => 'rw', default => sub { 0 });
+has '_jedi_roads_cache' => (is => 'lazy', clearer => 1);
+sub _build__jedi_roads_cache {
+	return CHI->new(driver => 'RawMemory', datastore => {}, max_size => 10_000);
+}
 
 =method road
 
@@ -93,6 +98,7 @@ sub road {
 
 	push(@{$self->_jedi_roads},[$base_route => $jedi]);
 	$self->_jedi_roads_is_sorted(0);
+	$self->_clear_jedi_roads_cache;
 	return;
 }
 
@@ -120,9 +126,15 @@ sub response {
 	my $path_info = $env->{PATH_INFO}->full_path();
 	my $response = Jedi::Response->new();
 
+	if (my $road_def = $self->_jedi_roads_cache->get($path_info)) {
+		my ($road, $jedi) = @$road_def;
+		return $jedi->response(Jedi::Request->new(jedi_env => $jedi_env, env => $env, path => $path_info->without_base($road)), $response);
+	}
+
 	for my $road_def(@$sorted_roads) {
 		my ($road, $jedi) = @$road_def;
 		if ($path_info->start_with($road)) {
+			$self->_jedi_roads_cache->set($path_info => $road_def);
 			return $jedi->response(Jedi::Request->new(jedi_env => $jedi_env, env => $env, path => $path_info->without_base($road)), $response);
 		}
 	}
