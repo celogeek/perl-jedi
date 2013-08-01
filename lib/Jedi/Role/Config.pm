@@ -46,6 +46,53 @@ use Path::Class;
 use FindBin qw/$Bin/;
 use Config::Any;
 
+=attr jedi_app_root
+
+This attribute set the root of your app based on the config files.
+
+It try to look for "config.*" or "environments/$jedi_env.*" and set the root app to this.
+
+If nothing found, the root app will be the current dir of the module.
+
+=cut
+has 'jedi_app_root' => (is => 'lazy');
+sub _build_jedi_app_root {
+	my ($self) = @_;
+	my $config_files = $self->jedi_config_files->[0];
+
+	return defined $config_files ? file($config_files)->dir : dir($Bin);
+}
+
+=attr jedi_config_files
+
+The config files found based on the root apps
+
+=cut
+has 'jedi_config_files' => (is => 'lazy');
+sub _build_jedi_config_files {
+	my ($self) = @_;
+
+	my $env = $self->jedi_env;
+
+	my $curdir = dir($Bin);
+	my $main_file = "config";
+	my $env_file = "" . file('environments', $env);
+
+	my @files;
+	while($curdir ne '/') {
+		for my $ext (Config::Any->extensions) {
+			my $full_main_file = file($curdir, $main_file . '.' .$ext);
+			my $full_env_file = file($curdir, $env_file . '.' . $ext);
+			push @files, $full_main_file if -f $full_main_file;
+			push @files, $full_env_file if -f $full_env_file;
+			last if @files;
+		}
+		last if @files;
+		$curdir = $curdir->parent;
+	}
+	return \@files;
+}
+
 =attr jedi_env
 
 Environment of your jedi app.
@@ -69,27 +116,10 @@ has 'jedi_config' => (is => 'lazy', clearer => 1);
 sub _build_jedi_config {
 	my ($self) = @_;
 
-	my $env = $self->jedi_env;
+	my $files = $self->jedi_config_files;
+	return {} if !@$files;
 
-	my $curdir = dir($Bin);
-	my $main_file = "config";
-	my $env_file = "" . file('environments', $env);
-
-	my @files;
-	while($curdir ne '/') {
-		for my $ext (Config::Any->extensions) {
-			my $full_main_file = file($curdir, $main_file . '.' .$ext);
-			my $full_env_file = file($curdir, $env_file . '.' . $ext);
-			push @files, $full_main_file if -f $full_main_file;
-			push @files, $full_env_file if -f $full_env_file;
-			last if @files;
-		}
-		last if @files;
-		$curdir = $curdir->parent;
-	}
-	return {} if !@files;
-
-    my $config = Config::Any->load_files( { files => \@files, use_ext => 1 } );
+    my $config = Config::Any->load_files( { files => $files, use_ext => 1 } );
     my $config_merged = {};
     for my $c(map { values %$_ } @$config) {
         %$config_merged = (%$config_merged, %$c);
