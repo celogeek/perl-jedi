@@ -3,6 +3,8 @@ use Test::Most 'die';
 use HTTP::Request::Common;
 use Plack::Test;
 use Module::Runtime qw/use_module/;
+use Path::Class;
+use FindBin qw/$Bin/;
 
 {
 	my $direct = use_module('t::lib::Config::App')->new;
@@ -11,6 +13,11 @@ use Module::Runtime qw/use_module/;
 		direct => 2,
 		conf => 'dev',
 	}, 'dev conf loaded';
+	is $direct->jedi_app_root, $Bin, '... and the root app is at the same place';
+	is_deeply $direct->jedi_config_files, [
+		file($Bin, 'config.yml'),
+		file($Bin, 'environments', 'development.yml')
+	], '... the conf found is correct';
 }
 
 for my $env_name(qw/JEDI_ENV PLACK_ENV/) {
@@ -22,6 +29,10 @@ for my $env_name(qw/JEDI_ENV PLACK_ENV/) {
 		is_deeply $direct->jedi_config, {
 			direct => 1,
 		}, 'prod conf loaded';
+		is $direct->jedi_app_root, $Bin, '... and the root app is at the same place';
+		is_deeply $direct->jedi_config_files, [
+			file($Bin, 'config.yml'),
+		], '... the conf found is correct';
 	}
 	
 	{
@@ -32,6 +43,11 @@ for my $env_name(qw/JEDI_ENV PLACK_ENV/) {
 			direct => 1,
 			conf => 'test',
 		}, 'test conf loaded';
+		is $direct->jedi_app_root, $Bin, '... and the root app is at the same place';
+		is_deeply $direct->jedi_config_files, [
+			file($Bin, 'config.yml'),
+			file($Bin, 'environments', 'test.yml')
+		], '... the conf found is correct';
 	}
 
 }
