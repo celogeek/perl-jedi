@@ -11,6 +11,8 @@ This role is to apply to your Moo module.
 
 You should use the L<Jedi::App> module.
 
+You module need to defined the sub "jedi_app", the road will call it directly.
+
 =cut
 
 use Moo::Role;
@@ -19,13 +21,14 @@ use Jedi::Helpers::Scalar;
 use CHI;
 use Carp qw/carp croak/;
 
+requires 'jedi_app';
+
 has '_jedi_routes' => ( is => 'ro', default => sub {{}} );
 has '_jedi_missing' => (is => 'ro', default => sub {[]});
 has '_jedi_routes_cache' => (is => 'lazy', clearer => 1);
 sub _build__jedi_routes_cache {
 	return CHI->new(driver => 'RawMemory', datastore => {}, max_size => 10_000);
 }
-
 
 sub _jedi_routes_push {
 	my ($self, $which, $path, $sub) = @_;
