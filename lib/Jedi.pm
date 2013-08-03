@@ -24,7 +24,7 @@ Then your Jedi Apps look likes :
 	package MyApps;
 	use Jedi::Apps;
 
-	sub jedi_apps {
+	sub jedi_app {
 		my ($jedi) = @_;
 
 		$jedi->get('/', $jedi->can('index'));
@@ -52,7 +52,7 @@ You can also plug multiple time the same route or similar, the response will be 
 
 A route can check the status to see if another route has already do something. Same think for the body.
 
-You can for instance, create a role, with a before "jedi_apps", that init or add body content, and you route, add more stuff.
+You can for instance, create a role, with a before "jedi_app", that init or add body content, and you route, add more stuff.
 
 Or do an after, that add to the routes, additional content.
 
