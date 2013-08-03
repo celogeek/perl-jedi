@@ -1,3 +1,5 @@
+    * Feature #287 : use EndOfScope to import the role for jedi app (Celogeek San)
+
 0.09  2013-08-02 08:56:00 GMT
     * Bug #283 : add missing deps on yaml, and fix directory matches on win (Celogeek San)
 
