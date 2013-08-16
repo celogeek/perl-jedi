@@ -1,3 +1,5 @@
+    * Bug #295 : Fix config root detection for windows env (Celogeek San)
+
 0.10  2013-08-03 16:25:26 GMT
     * Feature #287 : use EndOfScope to import the role for jedi app (Celogeek San)
 
