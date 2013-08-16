@@ -79,7 +79,9 @@ sub _build_jedi_config_files {
 	my $env_file = "" . file('environments', $env);
 
 	my @files;
-	while($curdir ne '/') {
+	my %look;
+	while(! exists $look{$curdir}) {
+		$look{$curdir} = 1;
 		for my $ext (Config::Any->extensions) {
 			my $full_main_file = file($curdir, $main_file . '.' .$ext);
 			my $full_env_file = file($curdir, $env_file . '.' . $ext);
