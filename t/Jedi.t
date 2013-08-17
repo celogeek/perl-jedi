@@ -21,6 +21,11 @@ $jedi->road('/', 't::lib::base');
 test_psgi $jedi->start, sub {
 	my $cb = shift;
 	{
+		my $res = $cb->(HEAD '/');
+		is $res->code, 200, 'Base status is correct';
+		is $res->content, 'Hello World !', '... and also the content';
+	}
+	{
 		my $res = $cb->(GET '/');
 		is $res->code, 200, 'Base status is correct';
 		is $res->content, 'Hello World !', '... and also the content';
