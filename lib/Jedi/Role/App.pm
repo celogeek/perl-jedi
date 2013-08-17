@@ -149,7 +149,9 @@ sub response {
 	my $routes = $self->_jedi_routes->{$request_method};
 	my $methods;
 	
-	if (my $cache_routes = $self->_jedi_routes_cache->get($path)) {
+	my $cache_key = $request_method . ':' . $path;
+
+	if (my $cache_routes = $self->_jedi_routes_cache->get($cache_key)) {
 		$methods = $cache_routes;
 	} else {
 		$methods = [];
@@ -166,7 +168,7 @@ sub response {
 	
 		@$methods = @{$self->_jedi_missing} if ! scalar @$methods;
 	
-		$self->_jedi_routes_cache->set($path => $methods);
+		$self->_jedi_routes_cache->set($cache_key => $methods);
 	}
 
 	for my $meth(@$methods) {

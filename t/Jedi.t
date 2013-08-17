@@ -35,6 +35,18 @@ test_psgi $jedi->start, sub {
 		is $res->code, 200, 'Base status is correct';
 		is $res->content, 'Hello World !', '... and also the content';
 	}
+
+	{
+		my $res = $cb->(POST '/');
+		is $res->code, 200, 'Base status is correct';
+		is $res->content, 'Hello World POST !', '... and also the content';
+	}
+	{
+		my $res = $cb->(POST '/');
+		is $res->code, 200, 'Base status is correct';
+		is $res->content, 'Hello World POST !', '... and also the content';
+	}
+
 	{
 		my $res = $cb->(GET '/404');
 		is $res->code, 404, 'Base status is correct';
