@@ -142,7 +142,11 @@ sub response {
 	my ($self, $request, $response) = @_;
 
 	my $path = $request->path;
-	my $routes = $self->_jedi_routes->{$request->env->{REQUEST_METHOD}};
+	
+	my $request_method = $request->env->{REQUEST_METHOD};
+	$request_method = 'GET' if $request_method eq 'HEAD';
+
+	my $routes = $self->_jedi_routes->{$request_method};
 	my $methods;
 	
 	if (my $cache_routes = $self->_jedi_routes_cache->get($path)) {
