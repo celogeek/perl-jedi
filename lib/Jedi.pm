@@ -22,7 +22,7 @@ Ex :
 Then your Jedi Apps look likes :
 
 	package MyApps;
-	use Jedi::Apps;
+	use Jedi::App;
 
 	sub jedi_app {
 		my ($jedi) = @_;
