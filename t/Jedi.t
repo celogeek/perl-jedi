@@ -64,6 +64,16 @@ test_psgi $jedi_admin->start, sub {
 		is $res->code, 500, 'Status of empty jedi is correct';
 		is $res->content, 'No road found !', '... and also the content';
 	}
+	{
+		my $res = $cb->(GET '/admin');
+		is $res->code, 200, 'Base status is correct';
+		is $res->content, 'Hello World !', '... and also the content';
+	}
+	{
+		my $res = $cb->(POST '/admin');
+		is $res->code, 200, 'Base status is correct';
+		is $res->content, 'Hello World POST !', '... and also the content';
+	}
 };
 
 my $jedi_bad_app = Jedi->new;
