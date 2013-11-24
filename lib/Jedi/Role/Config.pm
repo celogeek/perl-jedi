@@ -46,6 +46,16 @@ use Path::Class;
 use FindBin qw/$Bin/;
 use Config::Any;
 
+
+
+# TODO
+# Remove the app root
+# Config_files become a params (not auto discover)
+# Config will load the different config from the params
+# It will be set by jedi tools
+# It could be set by the user
+# We can set to default _auto_discover_config_files
+
 =attr jedi_app_root
 
 This attribute set the root of your app based on the config files.
