@@ -41,6 +41,14 @@ sub _jedi_routes_push {
 	return;
 }
 
+=attr jedi_config
+
+Config file loaded from the jedi launcher
+
+=cut
+
+has 'jedi_config' => (is => 'ro', default => sub {{}});
+
 =head1 ROUTES
 
 =head2 GET/POST/PUT/DELETE

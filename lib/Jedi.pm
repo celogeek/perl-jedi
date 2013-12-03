@@ -72,6 +72,7 @@ use CHI;
 use Module::Runtime qw/use_module/;
 use Carp qw/croak/;
 
+has '_jedi_config' => (is => 'ro', default => sub {{}});
 has '_jedi_roads' => (is => 'ro', default => sub {[]});
 has '_jedi_roads_is_sorted' => (is => 'rw', default => sub { 0 });
 has '_jedi_roads_cache' => (is => 'lazy', clearer => 1);
@@ -157,6 +158,7 @@ sub start {
 	my ($self) = @_;
 	return sub { $self->response(@_)->to_psgi };
 }
+
 
 1;
 
