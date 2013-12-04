@@ -72,13 +72,20 @@ use CHI;
 use Module::Runtime qw/use_module/;
 use Carp qw/croak/;
 
-has '_jedi_config' => (is => 'ro', default => sub {{}});
 has '_jedi_roads' => (is => 'ro', default => sub {[]});
 has '_jedi_roads_is_sorted' => (is => 'rw', default => sub { 0 });
 has '_jedi_roads_cache' => (is => 'lazy', clearer => 1);
 sub _build__jedi_roads_cache {
 	return CHI->new(driver => 'RawMemory', datastore => {}, max_size => 10_000);
 }
+
+=attr config
+
+Config pass to all your apps
+
+=cut
+
+has 'config' => (is => 'ro', default => sub {{}});
 
 =method road
 
@@ -92,7 +99,7 @@ sub road {
 	my ($self, $base_route, $module) = @_;
 	$base_route = $base_route->full_path();
 
-	my $jedi = use_module($module)->new();
+	my $jedi = use_module($module)->new(jedi_config => $self->config);
 	croak "$module is not a jedi app" unless $jedi->does('Jedi::Role::App');
 	
 	$jedi->jedi_app;
