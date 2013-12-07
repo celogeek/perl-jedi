@@ -27,10 +27,10 @@ For Jedi launcher :
 
 In your app.yml :
 
-  Jedi:
-    Roads:
-      MyApps: /
-      myApps::Admin: /
+  # Jedi:
+  #   Roads:
+  #     MyApps: /
+  #     MyApps::Admin: /admin
 
 and to start the config :
 
@@ -59,7 +59,10 @@ Your Jedi Apps look likes :
 		my ($jedi, $request, $response) = @_;
 		my $env = substr($request->path, length("/env/"));
 		$response->status(200);
-		$response->body("The env : <$env>, has the value <". ($request->env->{$env} // "").">");
+		$response->body(
+      "The env : <$env>, has the value <" .
+      ($request->env->{$env} // "") . 
+    ">");
 		return 1;
 	}
 
@@ -148,11 +151,11 @@ sub road {
 
 Check the road available based on the current request and call the appropriate Jedi::App module
 
-	my $response = $jedi->response(\%ENV);
+	my $response = $jedi->response($env);
 
 The response returned is a L<Jedi::Response>, you can call the to_psgi method to get the status / headers / body
 
-	my ($status, $headers, $body) = $response->to_psgi
+	my ($status, $headers, $body) = @{$response->to_psgi}
 
 =cut
 sub response {
