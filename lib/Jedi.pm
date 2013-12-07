@@ -11,7 +11,7 @@ A Jedi script will plug in roads, any Jedi::App you want.
 Ex :
    
    use Jedi;
-   my $jedi = Jedi->new
+   my $jedi = Jedi->new(config => $config);
 
    $jedi->road('/', 'MyApps');
    $jedi->road('/admin', 'MyApps::Admin');

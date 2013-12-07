@@ -4,10 +4,35 @@ package Jedi::Launcher;
 
 use Moo;
 # VERSION
-use MooX::Options authors => ['Celogeek <me@celogeek.com>'];
+use MooX::Options
+  authors => ['Celogeek <me@celogeek.com>'],
+  synopsis => <<__EOF__
+
+  jedi -c myApp.yml -c myAppProd.yml
+
+In myApp.yml:
+
+  Jedi:
+    Roads:
+      t::lib::configs::myConfigRoot: /
+      t::lib::configs::myConfigAdmin: /admin
+
+In myAppProd.yml:
+
+  Plack:
+    server: Starman
+    env: production
+  Starman:
+    workers: 2
+    port: 9999
+
+__EOF__
+;
 use feature 'say';
 use Config::Any;
+use Jedi;
 use Carp;
+use Plack::Runner;
 
 option 'config' => (
   is => 'ro',
@@ -27,10 +52,39 @@ option 'config' => (
 
 sub run {
   my ($self) = @_;
-  for my $config(@{$self->config}) {
-    say "Loading config $config ...";
+  
+  my $config = Config::Any->load_files( { files => $self->config, use_ext => 1 } );
+  my $config_merged = {};
+  for my $c(map { values %$_ } @$config) {
+      %$config_merged = (%$config_merged, %$c);
   }
-  exit(0);
+
+  croak "Jedi section is missing" if !defined $config_merged->{Jedi};
+  croak "Jedi/Roads section is missing" if !defined $config_merged->{Jedi}{Roads};
+  croak "Jedi/Roads shoud be 'module: path'" if ref $config_merged->{Jedi}{Roads} ne 'HASH';
+
+  my $jedi = Jedi->new(config => $config_merged);
+  my %roads = %{$config_merged->{Jedi}{Roads}};
+  for my $module(keys %roads) {
+    $jedi->road($roads{$module}, $module);
+  }
+
+  my $plack_config = $config_merged->{Plack} // {};
+  my $server_config = $plack_config->{server} ? $config_merged->{$plack_config->{server}} // {} : {};
+  my @options = (
+    ( map { "--" . $_ => $plack_config->{$_} } keys %$plack_config ),
+    ( map { "--" . $_ => $server_config->{$_} } keys %$server_config ),
+  );
+
+  my $runner = Plack::Runner->new;
+
+  say "Loading : plackup ", join(" ", @options);
+
+  $runner->parse_options(
+    @options
+  );
+
+  return $runner->run($jedi->start);
 }
 
 1;
@@ -47,13 +101,21 @@ myBlog.yml:
 
   Jedi:
     Roads:
-      Jedi::App::MiniCPAN::Doc : /
-      Jedi::App::MiniCPAN::Doc::Admin : /admin
+      Jedi::App::MiniCPAN::Doc: /
+      Jedi::App::MiniCPAN::Doc::Admin: /admin
   Plack:
-    environment: production
+    env: production
     server: Starman
-    server_options:
-      workers: 2
-      port: 9999
+  Starman
+    workers: 2
+    port: 9999
+  Jedi::App::MiniCPAN::Doc:
+    path : /var/lib/minicpan
 
-=cut
+The Jedi is init with the roads inside the config.
+
+The server plack is started using the config option. In that case it is equivalent to :
+
+  plackup --env=production --server=Starman --workers=2 --port=9999 myjedi.psgi
+
+Take a look at the L<plackup> option to see all possible config.
