@@ -96,8 +96,8 @@ sub plack_initialize {
   my $plack_config = $config->{Plack} // {};
   my $server_config = $plack_config->{server} ? $config->{$plack_config->{server}} // {} : {};
   my @options = (
-    ( map { "--" . $_ => $plack_config->{$_} } keys %$plack_config ),
-    ( map { "--" . $_ => $server_config->{$_} } keys %$server_config ),
+    ( map { "--" . $_ => $plack_config->{$_} } sort keys %$plack_config ),
+    ( map { "--" . $_ => $server_config->{$_} } sort keys %$server_config ),
   );
 
   my $runner = Plack::Runner->new;
