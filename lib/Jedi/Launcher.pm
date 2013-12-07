@@ -52,7 +52,19 @@ option 'config' => (
 
 sub run {
   my ($self) = @_;
-  
+
+  my $config = $self->parse_config;  
+  my $jedi = $self->jedi_initialize($config);
+  my ($runner, $options) = $self->plack_initialize($config);
+
+  say "Loading : plackup ", join(" ", @$options);
+
+  return $runner->run($jedi->start);
+}
+
+sub parse_config {
+  my ($self) = @_;
+
   my $config = Config::Any->load_files( { files => $self->config, use_ext => 1 } );
   my $config_merged = {};
   for my $c(map { values %$_ } @$config) {
@@ -63,14 +75,26 @@ sub run {
   croak "Jedi/Roads section is missing" if !defined $config_merged->{Jedi}{Roads};
   croak "Jedi/Roads shoud be 'module: path'" if ref $config_merged->{Jedi}{Roads} ne 'HASH';
 
-  my $jedi = Jedi->new(config => $config_merged);
-  my %roads = %{$config_merged->{Jedi}{Roads}};
+  return $config_merged;
+}
+
+sub jedi_initialize {
+  my ($self, $config) = @_;
+
+  my $jedi = Jedi->new(config => $config);
+  my %roads = %{$config->{Jedi}{Roads}};
   for my $module(keys %roads) {
     $jedi->road($roads{$module}, $module);
   }
 
-  my $plack_config = $config_merged->{Plack} // {};
-  my $server_config = $plack_config->{server} ? $config_merged->{$plack_config->{server}} // {} : {};
+  return $jedi;
+}
+
+sub plack_initialize {
+  my ($self, $config) = @_;
+
+  my $plack_config = $config->{Plack} // {};
+  my $server_config = $plack_config->{server} ? $config->{$plack_config->{server}} // {} : {};
   my @options = (
     ( map { "--" . $_ => $plack_config->{$_} } keys %$plack_config ),
     ( map { "--" . $_ => $server_config->{$_} } keys %$server_config ),
@@ -78,13 +102,11 @@ sub run {
 
   my $runner = Plack::Runner->new;
 
-  say "Loading : plackup ", join(" ", @options);
-
   $runner->parse_options(
     @options
   );
 
-  return $runner->run($jedi->start);
+  return $runner, \@options;
 }
 
 1;
