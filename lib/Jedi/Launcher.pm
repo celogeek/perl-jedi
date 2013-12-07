@@ -6,7 +6,7 @@ use Moo;
 # VERSION
 use MooX::Options
   authors => ['Celogeek <me@celogeek.com>'],
-  synopsis => <<__EOF__
+  synopsis => <<'__EOF__'
 
   jedi -c myApp.yml -c myAppProd.yml
 
@@ -34,6 +34,12 @@ use Jedi;
 use Carp;
 use Plack::Runner;
 
+=attr config
+
+config files to load
+
+=cut
+
 option 'config' => (
   is => 'ro',
   format => 's@',
@@ -50,6 +56,12 @@ option 'config' => (
   }
 );
 
+=method run
+
+load config, init jedi and plack and start your apps
+
+=cut
+
 sub run {
   my ($self) = @_;
 
@@ -61,6 +73,12 @@ sub run {
 
   return $runner->run($jedi->start);
 }
+
+=method parse_config
+
+load and merge all configs
+
+=cut
 
 sub parse_config {
   my ($self) = @_;
@@ -78,6 +96,12 @@ sub parse_config {
   return $config_merged;
 }
 
+=method jedi_initialize
+
+initialize the jedi apps from configs
+
+=cut
+
 sub jedi_initialize {
   my ($self, $config) = @_;
 
@@ -89,6 +113,12 @@ sub jedi_initialize {
 
   return $jedi;
 }
+
+=method plack_initialize
+
+initialize the plack runner from the option in the configs
+
+=cut
 
 sub plack_initialize {
   my ($self, $config) = @_;
