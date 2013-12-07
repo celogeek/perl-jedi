@@ -8,7 +8,11 @@ Jedi is another Web Framework, build for easiness to maintain, easy to understan
 
 A Jedi script will plug in roads, any Jedi::App you want.
 
-Ex :
+You have 2 way to initialize your app : 
+
+For Plack :
+
+In your app.psgi :
    
    use Jedi;
    my $jedi = Jedi->new(config => $config);
@@ -19,7 +23,20 @@ Ex :
    $jedi->start;
 
 
-Then your Jedi Apps look likes :
+For Jedi launcher :
+
+In your app.yml :
+
+  Jedi:
+    Roads:
+      MyApps: /
+      myApps::Admin: /
+
+and to start the config :
+
+  jedi -c app.yml
+
+Your Jedi Apps look likes :
 
 	package MyApps;
 	use Jedi::App;
@@ -47,6 +64,23 @@ Then your Jedi Apps look likes :
 	}
 
 	1;
+
+And your admin can look likes :
+
+  package MyApps;
+  use Jedi::App;
+
+  sub jedi_app {
+    my ($jedi) = @_;
+
+    $jedi->get('/', $jedi->can('index_admin'));
+  }
+
+  sub index_admin {
+    #...
+  }
+
+  1
 
 You can also plug multiple time the same route or similar, the response will be fill by each routes.
 
@@ -178,5 +212,7 @@ L<Jedi::App>
 L<Jedi::Request>
 
 L<Jedi::Response>
+
+L<Jedi::Launcher>
 
 =cut
