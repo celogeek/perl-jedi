@@ -33,6 +33,7 @@ use Config::Any;
 use Jedi;
 use Carp;
 use Plack::Runner;
+use lib ();
 
 =attr config
 
@@ -56,6 +57,20 @@ option 'config' => (
   }
 );
 
+=attr lib
+
+Include directory before starting include
+
+=cut
+
+option 'lib' => (
+  is => 'ro',
+  format => 's@',
+  short => 'I',
+  doc => 'library to include',
+  default => sub {[]},
+);
+
 =method run
 
 load config, init jedi and plack and start your apps
@@ -64,6 +79,10 @@ load config, init jedi and plack and start your apps
 
 sub run {
   my ($self) = @_;
+
+  for my $lib(@{$self->lib}) {
+	  lib->import($lib);
+  }
 
   my $config = $self->parse_config;  
   my $jedi = $self->jedi_initialize($config);
