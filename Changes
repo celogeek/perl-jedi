@@ -1,3 +1,6 @@
+  Feature #355: Clear the useless app conf, everything should use the share dir  
+  Feature #356: Create a jedi launcher
+
 0.14  2013-08-28 18:14:30 GMT
     * Bug #305 : Fix pod: Jedi::Apps => Jedi::App (Celogeek San)
 
