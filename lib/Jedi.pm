@@ -4,13 +4,15 @@ package Jedi;
 
 =head1 DESCRIPTION
 
-Jedi is another Web Framework, build for easiness to maintain, easy to understand, and NO DSL !
+Jedi is yet another Web app Framework, build for easiness to maintain, easy to understand, and NO DSL !
+
+=HEAD1 SYNOPSIS
 
 A Jedi script will plug in roads, any Jedi::App you want.
 
 You have 2 way to initialize your app : 
 
-For Plack :
+With Plack :
 
 In your app.psgi :
    
@@ -22,8 +24,11 @@ In your app.psgi :
 
    $jedi->start;
 
+Then
 
-For Jedi launcher :
+   plackup app.psgi
+
+With Jedi Launcher :
 
 In your app.yml :
 
