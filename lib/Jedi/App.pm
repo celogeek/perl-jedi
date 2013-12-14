@@ -79,7 +79,6 @@ This module is equivalent into your package to :
 	package MyApps;
 	use Moo;
 	with "Jedi::Role::App";
-	with "Jedi::Role::Config";
 
 =cut
 sub import {
@@ -87,7 +86,6 @@ sub import {
 	use_module('Moo')->import::into($target);
 	on_scope_end {
 		$target->can('with')->('Jedi::Role::App');
-		$target->can('with')->('Jedi::Role::Config');
 	};
 	return;
 }
@@ -101,16 +99,6 @@ __END__
 
 You can access to the config from your apps. Use the attribute "jedi_config".
 
-See L<Jedi::Role::Config> for more defails
-
-=head2 jedi_env
-
-You can access to the jedi_env config from your apps. Use the attribute "jedi_env".
-
-See L<Jedi::Role::Config> for more defails
-
 =head1 SEE ALSO
 
 L<Jedi::Role::App>
-
-L<Jedi::Role::Config>

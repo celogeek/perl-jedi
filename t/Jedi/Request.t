@@ -162,27 +162,7 @@ test_psgi $jedi->start, sub {
 	}
 
 
-	{
-		#Test jedi default env
-		my $res = $cb->(GET '/jedi_env');
-		is $res->code, 200, 'status is correct';
-		is_deeply $res->content, 'development', '... and content is correct';
-
-	}
 };
-
-{
-	local $ENV{PLACK_ENV} = 'test';
-	test_psgi $jedi->start, sub {
-		my ($cb) = @_;
-		{
-			#Test jedi default env
-			my $res = $cb->(GET '/jedi_env');
-			is $res->code, 200, 'status is correct';
-			is_deeply $res->content, 'test', '... and content is correct';
-		}
-	}
-}
 
 {
 	# test scheme/port/env
