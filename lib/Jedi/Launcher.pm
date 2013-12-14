@@ -166,7 +166,7 @@ __END__
 
 This app load config files and start your jedi app.
 
-=head SYNOPSIS
+=head1 SYNOPSIS
 
 myBlog.yml:
 
