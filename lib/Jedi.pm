@@ -6,7 +6,7 @@ package Jedi;
 
 Jedi is yet another Web app Framework, build for easiness to maintain, easy to understand, and NO DSL !
 
-=HEAD1 SYNOPSIS
+=head1 SYNOPSIS
 
 A Jedi script will plug in roads, any Jedi::App you want.
 
@@ -16,26 +16,26 @@ With Plack :
 
 In your app.psgi :
    
-   use Jedi;
-   my $jedi = Jedi->new(config => $config);
-
-   $jedi->road('/', 'MyApps');
-   $jedi->road('/admin', 'MyApps::Admin');
-
-   $jedi->start;
+ use Jedi;
+ my $jedi = Jedi->new(config => $config);
+ 
+ $jedi->road('/', 'MyApps');
+ $jedi->road('/admin', 'MyApps::Admin');
+ 
+ $jedi->start;
 
 Then
 
-   plackup app.psgi
+ plackup app.psgi
 
 With Jedi Launcher :
 
 In your app.yml :
 
-  # Jedi:
-  #   Roads:
-  #     MyApps: /
-  #     MyApps::Admin: /admin
+ Jedi:
+   Roads:
+     MyApps: "/"
+     MyApps::Admin: "/admin"
 
 and to start the config :
 
@@ -43,54 +43,51 @@ and to start the config :
 
 Your Jedi Apps look likes :
 
-	package MyApps;
-	use Jedi::App;
-
-	sub jedi_app {
-		my ($jedi) = @_;
-
-		$jedi->get('/', $jedi->can('index'));
-		$jedi->get(qr{/env/.*}, $jedi->can('env'));
-	}
-
-	sub index {
-		my ($jedi, $request, $response) = @_;
-		$response->status(200);
-		$response->body('Hello World !');
-		return 1;
-	}
-
-	sub env {
-		my ($jedi, $request, $response) = @_;
-		my $env = substr($request->path, length("/env/"));
-		$response->status(200);
-		$response->body(
+ package MyApps;
+ use Jedi::App;
+ 
+ sub jedi_app {
+ 	my ($jedi) = @_;
+ 	$jedi->get('/', $jedi->can('index'));
+ 	$jedi->get(qr{/env/.*}, $jedi->can('env'));
+ }
+ 
+ sub index {
+ 	my ($jedi, $request, $response) = @_;
+ 	$response->status(200);
+ 	$response->body('Hello World !');
+ 	return 1;
+ }
+ 
+ sub env {
+ 	my ($jedi, $request, $response) = @_;
+ 	my $env = substr($request->path, length("/env/"));
+ 	$response->status(200);
+ 	$response->body(
       "The env : <$env>, has the value <" .
       ($request->env->{$env} // "") . 
     ">");
-		return 1;
-	}
+ 	return 1;
+ }
 
-	1;
+ 1;
 
 And your admin can look likes :
 
-  package MyApps;
-  use Jedi::App;
+ package MyApps;
+ use Jedi::App;
+ 
+ sub jedi_app {
+   my ($jedi) = @_;
+   $jedi->get('/', $jedi->can('index_admin'));
+ }
+ 
+ sub index_admin {
+   #...
+ }
+ 1
 
-  sub jedi_app {
-    my ($jedi) = @_;
-
-    $jedi->get('/', $jedi->can('index_admin'));
-  }
-
-  sub index_admin {
-    #...
-  }
-
-  1
-
-You can also plug multiple time the same route or similar, the response will be fill by each routes.
+You can also plug multiple time the same route, the response will be fill by each routes.
 
 A route can check the status to see if another route has already do something. Same think for the body.
 
