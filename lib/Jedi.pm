@@ -1,6 +1,6 @@
 package Jedi;
 
-# ABSTRACT: Jedi Web App Framework
+# ABSTRACT: Web App Framework
 
 use Moo;
 
@@ -80,3 +80,93 @@ sub _response {
 }
 
 1;
+__END__
+
+=head1 DESCRIPTION
+
+Jedi is a web framework, easy to understand, without DSL !
+
+In a galaxy, far far away, a misterious force is operating. Come on young Padawan, let me show you how to use that power wisely !
+
+=head1 SYNOPSIS
+
+An Jedi App is simple as a package in perl. You can initialize the app with the jedi launcher and a config file.
+
+When you include L<Jedi::App>, it will automatically import L<Moo> and the L<Jedi::Role::App> in your package.
+
+In MyApps.pm :
+
+ package MyApps;
+ use Jedi::App;
+ 
+ sub jedi_app {
+  my ($app) = @_;
+  $app->get('/', $app->can('index'));
+  $app->get('/config', $app->can('show_config'));
+  $app->get(qr{/env/.*}, $app->can('env'));
+ }
+ 
+ sub index {
+  my ($app, $request, $response) = @_;
+  $response->status(200);
+  $response->body('Hello World !');
+  return 1;
+ }
+
+ sub env {
+  my ($app, $request, $response) = @_;
+  my $env = substr($request->path, length("/env/"));
+  $response->status(200);
+  $response->body(
+      "The env : <$env>, has the value <" .
+      ($request->env->{$env} // "") . 
+    ">");
+  return 1;
+ }
+
+ sub show_config {
+  my ($app, $request, $response) = @_;
+  $response->status(200);
+  $response->body($app->jedi_config->{MyApps}{foo});
+  return 1;
+ }
+
+ 1;
+
+In MyApps::Admin :
+
+ package MyApps;
+ use Jedi::App;
+ 
+ sub jedi_app {
+   my ($jedi) = @_;
+   $jedi->get('/', $jedi->can('index_admin'));
+ }
+ 
+ sub index_admin {
+   #...
+ }
+ 1
+
+The you can create a lauching config app.yml :
+
+ Jedi:
+   Roads:
+     MyApps: "/"
+     MyApps::Admin: "/admin"
+ Plack:
+   env: production
+   server: Starman
+ Starman:
+   workers: 2
+ MyApps:
+   foo: bar
+
+To start your app :
+
+ jedi -c app.yml
+
+And if you want to test your app with your package inside the 'lib' directory :
+
+ jedi -Ilib -c app.yml
+
