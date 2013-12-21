@@ -1,6 +1,6 @@
 package Jedi::Request;
 
-# ABSTRACT: Jedi Request
+# ABSTRACT: Request object
 
 =head1 DESCRIPTION
 
@@ -20,7 +20,7 @@ use CGI::Cookie::XS;
 
 =attr env
 
-The environment variable, as it received from PSGI
+The environment variable, as it received from PSGI. This is a HASH.
 
 =cut
 has 'env' => (is => 'ro', required => 1);
@@ -31,6 +31,10 @@ The end of the path_info, without the road.
 
 Ex:
 	road("/test"), route("/me") # so /test/me/ will give the path /me/
+
+The $ENV{PATH_INFO} is untouch, you can use that method to get the relative PATH.
+
+The path always end with '/'.
 
 =cut
 has 'path' => (is => 'ro', required => 1);
@@ -50,10 +54,12 @@ Ex:
 	a=1&a=2&a=3&b=4&b=5&b=6&c=1
 
 You receive:
-	
-	a => [1,2,3]
-	b => [4,5,6]
-	c => 1
+
+  {	
+   a => [1,2,3],
+   b => [4,5,6],
+   c => 1
+  }
 
 =cut
 has 'params' => (is => 'lazy');
@@ -88,7 +94,7 @@ Ex with curl :
 	
 	curl -F 'test@test.txt' http://localhost:5000/post
 
-You can read then the tempname file to get the content. When the request is sent back, the file is automatically removed.
+You can read the tempname file to get the content. When the request is sent back, the file is automatically removed.
 
 See <HTTP::Body> for more details.
 
@@ -106,7 +112,7 @@ sub _build_uploads {
 
 =attr cookies
 
-Parse the HTTP_COOKIE, and return an Hash of array
+Parse the HTTP_COOKIE, and return an HASH of ARRAY
 
 Ex:
 
@@ -114,34 +120,17 @@ Ex:
 
 You receive:
 	
-	a => [1,2,3]
-	b => [4,5,6]
+ {
+  a => [1,2,3],
+	b => [4,5,6],
 	c => [1]
+ }
 
 =cut
 has 'cookies' => (is => 'lazy');
 sub _build_cookies {
 	my ($self) = @_;
 	return CGI::Cookie::XS->parse($self->env->{HTTP_COOKIE} // '');
-}
-
-has '_body' => (is => 'lazy');
-sub _build__body {
-	my ($self) = @_;
-	
-	my $type = $self->env->{'CONTENT_TYPE'} || '';
-	my $length = $self->env->{'CONTENT_LENGTH'} || 0;
-	my $io = $self->env->{'psgi.input'};
-	my $body = HTTP::Body->new($type, $length);
-	$body->cleanup(1);
-
-	while($length) {
-        $io->read( my $buffer, ( $length < 8192 ) ? $length : 8192 );
-        $length -= length($buffer);
-        $body->add($buffer);
-	}
-
-	return $body;
 }
 
 =method scheme
@@ -190,4 +179,28 @@ sub host {
 	|| $env->{'HTTP_HOST'}
 	|| '';
 }
+
+# PRIVATE
+
+has '_body' => (is => 'lazy');
+sub _build__body {
+  my ($self) = @_;
+  
+  my $type = $self->env->{'CONTENT_TYPE'} || '';
+  my $length = $self->env->{'CONTENT_LENGTH'} || 0;
+  my $io = $self->env->{'psgi.input'};
+  my $body = HTTP::Body->new($type, $length);
+  $body->cleanup(1);
+
+  while($length) {
+        $io->read( my $buffer, ( $length < 8192 ) ? $length : 8192 );
+        $length -= length($buffer);
+        $body->add($buffer);
+  }
+
+  return $body;
+}
+
+
+
 1;
