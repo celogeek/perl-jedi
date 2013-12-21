@@ -141,8 +141,8 @@ In MyAdmin.pm :
  use Jedi::App;
  
  sub jedi_app {
-   my ($jedi) = @_;
-   $jedi->get('/', $jedi->can('index_admin'));
+   my ($app) = @_;
+   $app->get('/', $app->can('index_admin'));
  }
  
  sub index_admin {
