@@ -172,8 +172,8 @@ myBlog.yml:
 
   Jedi:
     Roads:
-      Jedi::App::MiniCPAN::Doc: /
-      Jedi::App::MiniCPAN::Doc::Admin: /admin
+      Jedi::App::MiniCPAN::Doc: "/"
+      Jedi::App::MiniCPAN::Doc::Admin: "/admin"
   Plack:
     env: production
     server: Starman
@@ -181,7 +181,7 @@ myBlog.yml:
     workers: 2
     port: 9999
   Jedi::App::MiniCPAN::Doc:
-    path : /var/lib/minicpan
+    path: /var/lib/minicpan
 
 The Jedi is init with the roads inside the config.
 
