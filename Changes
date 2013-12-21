@@ -1,3 +1,4 @@
+1.000  2013-12-21 14:36:50 GMT
     * Feature #385 : Rewrite pod for Jedi Core (Celogeek San)
     * Feature #355 : Clear the useless app conf, everything should use the share dir (Celogeek San)
     * Feature #356: Create a jedi launcher (Celogeek San)
