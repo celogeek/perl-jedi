@@ -103,7 +103,7 @@ In MyApps.pm :
   my ($app) = @_;
   $app->get('/', $app->can('index'));
   $app->get('/config', $app->can('show_config'));
-  $app->get(qr{/env/.*}, $app->can('env'));
+  $app->get(qr{/env/.+}, $app->can('env'));
  }
  
  sub index {
@@ -115,7 +115,9 @@ In MyApps.pm :
 
  sub env {
   my ($app, $request, $response) = @_;
-  my $env = substr($request->path, length("/env/"));
+  # path return always a "/" at the end
+  # so /env/QUERY_STRING?a=1 => path = /env/QUERY_STRING/
+  my $env = substr($request->path, length("/env/"), -1); 
   $response->status(200);
   $response->body(
       "The env : <$env>, has the value <" .
@@ -133,9 +135,9 @@ In MyApps.pm :
 
  1;
 
-In MyApps::Admin :
+In MyAdmin.pm :
 
- package MyApps;
+ package MyAdmin;
  use Jedi::App;
  
  sub jedi_app {
@@ -144,7 +146,9 @@ In MyApps::Admin :
  }
  
  sub index_admin {
-   #...
+  my ($app, $request, $response) = @_;
+  $response->status(200);
+  $response->body('Admin !');
  }
  1
 
@@ -153,20 +157,120 @@ The you can create a lauching config app.yml :
  Jedi:
    Roads:
      MyApps: "/"
-     MyApps::Admin: "/admin"
+     MyAdmin: "/admin"
  Plack:
    env: production
    server: Starman
  Starman:
    workers: 2
+   port: 9999
  MyApps:
    foo: bar
 
 To start your app :
 
- jedi -c app.yml
+ perl-jedi -c app.yml
 
 And if you want to test your app with your package inside the 'lib' directory :
 
- jedi -Ilib -c app.yml
+ perl-jedi -Ilib -c app.yml
+
+You can try requests :
+
+ curl http://localhost:9999/
+ # Hello World !
+ 
+ curl http://localhost:9999/config
+ # bar
+ 
+ curl http://localhost:9999/admin
+ # Admin !
+
+ curl http://localhost:9999/env/QUERY_STRING?a=1
+ # The env : <QUERY_STRING>, has the value <a=1>
+
+=head1 HOW TO LAUNCH YOUR APPS
+
+The L<Jedi> engine is a simple perl module that will handle the request and dispatch them to all your apps.
+
+A L<Jedi::App> is plugged into the L<Jedi> engine by using the L<Jedi::Launcher> and a launch config file, or directly by using Jedi with Plack.
+
+=head2 WITH THE Jedi::Launcher
+
+This is the recommended method,
+because it will load you config files,
+merge them,
+init the L<Jedi> engine and start L<Plack::Runner> with your config.
+
+The launcher name is 'perl-jedi', and it take your configs as parameter :
+
+ perl-jedi -c myGlobalConf.yml -c myConfForPlack.yml -c myEnvProd.yml
+
+All this config will be merge together to create a simple HASH.
+
+The config is composed of different parts, some of them for L<Jedi>, some of them for L<Plack::Runner> and others for your apps.
+
+=head3 The part for L<Jedi>
+
+ Jedi:
+   Roads:
+     Jedi::App::Blog: '/'
+     Jedi::App::BlogAlt: '/'
+     Jedi::App::Admin::Blog: '/admin'
+
+It will load Jedi::App::Blog and Jedi::App::BlogAlt, and mount it into "/".
+And also load Jedi::App::Admin::Blog, and mount it into "/admin"
+
+You can push severals roads here, and many modules can be used with the same road.
+If one app doesn't take the path, it could be handle by the next app.
+
+=head3 The part for L<Plack::Runner>
+
+  Plack:
+    env: production
+    server: Starman
+  Starman:
+    workers: 2
+    port: 9999
+
+The config is take in that order : L<Plack>, then read Plack / server and read the section for the server, here it is L<Starman>.
+
+Then all the config is converted for L<Plack::Runner> as arguments. You can take a look to L<plackup> for all possible options.
+
+=head3 The part for your app
+
+You will receive all the config, like a simple HASH into all your apps.
+And this will be exactly the same data.
+So technically you can create the config you want.
+
+But I advice for sharing purpose (if you release that on cpan), to use as a base key for your app, the name of your package :
+
+ Jedi::App::Blog:
+   template_dir: /var/www/blog
+ Jedi::App::BlogAlt:
+   template_dir: /var/www/blog/alt
+ Jedi::App::Admin::Blog:
+   defaultAdmin:
+     user: admin
+     password: admin
+
+So app can read and change the config of other apps on the fly. Also you can create plugin that can do that...
+
+For example, the L<Jedi::Plugin::Template>, will create a key PACKAGE/template_dir when it is used. So you can override that value to
+use another template.
+
+=head2 WITH Jedi AND plackup
+
+The above example is equivalent to :
+
+ plackup --env production --server Starman --workers 2 --port 9999 app.psgi
+
+And the app.psgi contain :
+
+ use Jedi;
+ my $jedi = Jedi->new(config => {%configToLoadYourSelfHere});
+ $jedi->road('/' => 'Jedi::App::Blog');
+ $jedi->road('/' => 'Jedi::App::BlogAlt');
+ $jedi->road('/admin' => 'Jedi::App::Admin::Blog');
+ $jedi->start;
 
