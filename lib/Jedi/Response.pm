@@ -1,6 +1,6 @@
 package Jedi::Response;
 
-# ABSTRACT: Jedi Response
+# ABSTRACT: response object
 
 =head1 DESCRIPTION
 
@@ -18,15 +18,15 @@ use Jedi::Helpers::Hash;
 
 Status code, by default is 404 (not found).
 
-You can consult the HTTP status but here some common :
+You can consult the L<HTTP status|http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html> but here some common :
 
-	500: internal server error
-	404: route not found
-	405: access forbidden
-	204: no content
-	200: status ok, with content
-	302: redirect
-	301: permanent redirect
+ 500: internal server error
+ 404: route not found
+ 405: access forbidden
+ 204: no content
+ 200: status ok, with content
+ 302: redirect
+ 301: permanent redirect
 
 =cut
 
@@ -36,12 +36,12 @@ has 'status' => (is => 'rw', default => sub{404});
 
 This contain the headers you will send with your response.
 
-You should use the method set_header and push_header instead of filling this attribute directly.
+You should use the method L</set_header> and L</push_header> instead of filling this attribute directly.
 
 The attribute has this form :
 
-	key => [val1, val2 ...],
-	key2 => [val4],
+ key => [val1, val2 ...],
+ key2 => [val4],
 
 =cut
 has 'headers' => (is => 'ro', default => sub{{}});
@@ -50,44 +50,44 @@ has 'headers' => (is => 'ro', default => sub{{}});
 
 Set an header to a specific value.
 
-	$response->set_header('X-AUTH', $token);
-	$response->set_header('Location', 'http://blog.celogeek.com');
+ $response->set_header('X-AUTH', $token);
+ $response->set_header('Location', 'http://blog.celogeek.com');
 
 =cut
 sub set_header {
-	my ($self, $header_name, $header_value) = @_;
-	$self->headers->{$header_name} = [$header_value];
-	return;
+  my ($self, $header_name, $header_value) = @_;
+  $self->headers->{$header_name} = [$header_value];
+  return;
 }
 
 =method push_header
 
 Push an header to a specific value
 
-	$response->push_header('Set-Cookie', 'myCookie=a');
-	$response->push_header('Set-Cookie', 'myCookie2=b');
+ $response->push_header('Set-Cookie', 'myCookie=a');
+ $response->push_header('Set-Cookie', 'myCookie2=b');
 
 You will see :
 
-	Set-Cookie: myCookie=a
-	Set-Cookie: myCookie=b
+ Set-Cookie: myCookie=a
+ Set-Cookie: myCookie=b
 
 =cut
 sub push_header {
-	my ($self, $header_name, $header_value) = @_;
-	if (exists $self->headers->{$header_name}) {
-		push @{$self->headers->{$header_name}}, $header_value;
-	} else {
-		$self->set_header($header_name, $header_value);
-	}
-	return;
+  my ($self, $header_name, $header_value) = @_;
+  if (exists $self->headers->{$header_name}) {
+    push @{$self->headers->{$header_name}}, $header_value;
+  } else {
+    $self->set_header($header_name, $header_value);
+  }
+  return;
 }
 
 =attr body
 
 The body is the string return to the browser.
 
-	$response->body("Hello World !");
+ $response->body("Hello World !");
 
 =cut
 has 'body' => (is => 'rw', default => sub{''});
@@ -101,11 +101,11 @@ It is use by Jedi to transform the response into a valid psgi response.
 
 =cut
 sub to_psgi {
-	my ($self) = @_;
+  my ($self) = @_;
 
-	$self->body('No route found !') if $self->status == 404 && ! length($self->body);
+  $self->body('No route found !') if $self->status == 404 && ! length($self->body);
 
-	return [$self->status, $self->headers->to_arrayref, [$self->body]];
+  return [$self->status, $self->headers->to_arrayref, [$self->body]];
 }
 
 1;
