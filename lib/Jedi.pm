@@ -274,3 +274,23 @@ And the app.psgi contain :
  $jedi->road('/admin' => 'Jedi::App::Admin::Blog');
  $jedi->start;
 
+=head1 MANUALS
+
+=over
+
+=item * L<Jedi::Launcher>
+
+You have a good overview of the jedi launcher here. You can run :
+
+ perl-jedi --help
+ perl-jedi --man
+
+=item * L<Jedi::App>
+
+An L<Jedi::App> is a L<Moo> package that will be load by L<Jedi>.
+
+Each app declare a method 'jedi_app'. This method is called directly by L<Jedi> to initialize your app.
+
+This is the good place to declare your routes, and initialize your databases and any stuff you need.
+
+=back
