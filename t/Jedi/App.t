@@ -158,4 +158,41 @@ use Jedi;
 	}
 }
 
+{
+  my $jedi = Jedi->new;
+  $jedi->road('/', 't::lib::config');
+  test_psgi $jedi->start, sub {
+    my ($cb) = shift;
+    {
+      my $res = $cb->(GET '/');
+      is $res->code, 200, 'route is correct';
+      is $res->content, 'noconf', '... and body set';
+    }
+  };
+
+  $jedi->config->{myconf} = 'ok';
+  test_psgi $jedi->start, sub {
+    my ($cb) = shift;
+    {
+      my $res = $cb->(GET '/');
+      is $res->code, 200, 'route is correct';
+      is $res->content, 'ok', '... and body set';
+    }
+  };
+
+}
+
+{
+  my $jedi = Jedi->new(config => {myconf => 'ok again'});
+  $jedi->road('/', 't::lib::config');
+  test_psgi $jedi->start, sub {
+    my ($cb) = shift;
+    {
+      my $res = $cb->(GET '/');
+      is $res->code, 200, 'route is correct';
+      is $res->content, 'ok again', '... and body set';
+    }
+  };
+}
+
 done_testing;

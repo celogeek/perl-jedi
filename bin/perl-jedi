@@ -1,0 +1,11 @@
+#!/usr/bin/env perl
+
+# PODNAME: jedi
+# ABSTRACT: Jedi App Launcher
+
+use strict;
+use warnings;
+# VERSION
+use Jedi::Launcher;
+
+Jedi::Launcher->new_with_options->run();

@@ -16,8 +16,6 @@ sub jedi_app {
 
 	$jedi->get('/cookie', $jedi->can('handle_cookies'));
 
-	$jedi->get('/jedi_env', $jedi->can('handle_jedi_env'));
-
 	$jedi->get('/scheme', $jedi->can('handle_scheme'));
 	$jedi->get('/host', $jedi->can('handle_host'));
 	$jedi->get('/port', $jedi->can('handle_port'));
@@ -48,14 +46,6 @@ sub handle_cookies {
 	my $cookies = $request->cookies;
 	$response->status(200);
 	$response->body(to_json($cookies));	
-	return 1;
-}
-
-sub handle_jedi_env {
-	my ($jedi, $request, $response) = @_;
-	$jedi->clear_jedi_env;
-	$response->status(200);
-	$response->body($jedi->jedi_env);
 	return 1;
 }
 
