@@ -197,7 +197,7 @@ sub _build_remote_address {
     my @possible_ips = (
         ( grep { _ip_is_public($_) } (
                 $env->{'HTTP_CLIENT_IP'},
-                split(/,/, $env->{'HTTP_X_FORWARDED_FOR'} // ''),
+                split(/,/x, $env->{'HTTP_X_FORWARDED_FOR'} // ''),
                 $env->{'HTTP_X_FORWARDED'},
                 $env->{'HTTP_X_CLUSTER_CLIENT_IP'},
                 $env->{'HTTP_FORWARDED_FOR'},
@@ -233,8 +233,8 @@ sub _build__body {
 
 sub _ip_to_int {
     my ($ip) = @_;
-    $ip =~ s/\s+//g;
-    my @ip_split = split(/\./, $ip, 4);
+    $ip =~ s/\s+//gx;
+    my @ip_split = split(/\./x, $ip, 4);
     return 0 if @ip_split != 4;
 
     return $ip_split[0] * 256 ** 3 + $ip_split[1] * 256 ** 2 + $ip_split[2] * 256 + $ip_split[3];
