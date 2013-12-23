@@ -1,3 +1,5 @@
+    * Feature #389 : Add IP of the caller (remote_address) (Celogeek San)
+
 1.000  2013-12-21 14:36:50 GMT
     * Feature #385 : Rewrite pod for Jedi Core (Celogeek San)
     * Feature #355 : Clear the useless app conf, everything should use the share dir (Celogeek San)
