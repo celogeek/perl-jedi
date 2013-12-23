@@ -10,13 +10,17 @@ You can get data from it, to generate your response
 
 =cut
 
-use Moo;
-
+use strict;
+use warnings;
 # VERSION
 
+# USE
 use HTTP::Body;
 use CGI::Deurl::XS 'parse_query_string';
 use CGI::Cookie::XS;
+
+# MOO PACKAGE
+use Moo;
 
 =attr env
 
