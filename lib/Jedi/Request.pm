@@ -10,13 +10,17 @@ You can get data from it, to generate your response
 
 =cut
 
-use Moo;
-
+use strict;
+use warnings;
 # VERSION
 
+# USE
 use HTTP::Body;
 use CGI::Deurl::XS 'parse_query_string';
 use CGI::Cookie::XS;
+
+# MOO PACKAGE
+use Moo;
 
 =attr env
 
@@ -180,6 +184,32 @@ sub host {
 	|| '';
 }
 
+=attr remote_address
+
+Try to find the real ip of the user and return the int number of it
+
+=cut
+
+has 'remote_address' => (is => 'lazy');
+sub _build_remote_address {
+    my ($self) = @_;
+    my $env = $self->env;
+    my @possible_ips = (
+        ( grep { _ip_is_public($_) } (
+                $env->{'HTTP_CLIENT_IP'},
+                split(/,/, $env->{'HTTP_X_FORWARDED_FOR'} // ''),
+                $env->{'HTTP_X_FORWARDED'},
+                $env->{'HTTP_X_CLUSTER_CLIENT_IP'},
+                $env->{'HTTP_FORWARDED_FOR'},
+                $env->{'HTTP_FORWARDED'}
+            )
+        ),
+        $env->{'REMOTE_ADDR'}
+    );
+
+    return _ip_to_int($possible_ips[0] // '');
+}
+
 # PRIVATE
 
 has '_body' => (is => 'lazy');
@@ -201,4 +231,33 @@ sub _build__body {
   return $body;
 }
 
+sub _ip_to_int {
+    my ($ip) = @_;
+    $ip =~ s/\s+//g;
+    my @ip_split = split(/\./, $ip, 4);
+    return 0 if @ip_split != 4;
+
+    return $ip_split[0] * 256 ** 3 + $ip_split[1] * 256 ** 2 + $ip_split[2] * 256 + $ip_split[3];
+}
+
+my @private_ips = map { [map{_ip_to_int($_)} @$_] } (
+    ['0.0.0.0','2.255.255.255'],
+    ['10.0.0.0','10.255.255.255'],
+    ['127.0.0.0','127.255.255.255'],
+    ['169.254.0.0','169.254.255.255'],
+    ['172.16.0.0','172.31.255.255'],
+    ['192.0.2.0','192.0.2.255'],
+    ['192.168.0.0','192.168.255.255'],
+    ['255.255.255.0','255.255.255.255'],
+);
+
+sub _ip_is_public {
+    my ($ip) = @_;
+    return if !defined $ip;
+    my $ip_int = _ip_to_int($ip);
+    for my $ip_priv(@private_ips) {
+        return if $ip_int >= $ip_priv->[0] && $ip_int <= $ip_priv->[1];
+    }
+    return 1;
+}
 1;
