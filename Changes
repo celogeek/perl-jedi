@@ -1,3 +1,5 @@
+    * Bug #398 : pod: mysterious with a y (Celogeek San)
+
 1.002  2013-12-23 21:41:33 GMT
     * Feature #389 : Add IP of the caller (remote_address) (Celogeek San)
 	Fix perlcritic
