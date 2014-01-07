@@ -86,7 +86,7 @@ __END__
 
 Jedi is a web framework, easy to understand, without DSL !
 
-In a galaxy, far far away, a misterious force is operating. Come on young Padawan, let me show you how to use that power wisely !
+In a galaxy, far far away, a mysterious force is operating. Come on young Padawan, let me show you how to use that power wisely !
 
 =head1 SYNOPSIS
 
