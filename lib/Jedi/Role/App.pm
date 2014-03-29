@@ -41,6 +41,7 @@ sub _jedi_routes_push {
 # ATTRIBUTES
 
 has 'jedi_config' => (is => 'ro', default => sub {{}});
+has 'jedi_base_route' => (is => 'ro');
 
 # PUBLIC METHODS
 

@@ -1,3 +1,6 @@
+1.004  2014-03-29 17:56:11 GMT
+    * Feature #421 : Add jedi_base_route method, useful for template (Celogeek San)
+
 1.003  2014-01-07 21:54:11 GMT
     * Bug #398 : pod: mysterious with a y (Celogeek San)
 

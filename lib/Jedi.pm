@@ -22,7 +22,7 @@ sub road {
 	my ($self, $base_route, $module) = @_;
 	$base_route = $base_route->full_path();
 
-	my $jedi = use_module($module)->new(jedi_config => $self->config);
+	my $jedi = use_module($module)->new(jedi_config => $self->config, jedi_base_route => $base_route);
 	croak "$module is not a jedi app" unless $jedi->does('Jedi::Role::App');
 	
 	$jedi->jedi_app;
