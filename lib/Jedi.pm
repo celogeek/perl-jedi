@@ -13,16 +13,24 @@ use CHI;
 
 use Module::Runtime qw/use_module/;
 use Carp qw/croak/;
+use Sys::HostIP;
 
 # PUBLIC METHOD
 
 has 'config' => (is => 'ro', default => sub {{}});
+has 'host_ip' => (
+	is => 'ro',
+	lazy => 1,  
+	default => sub {
+		return Sys::HostIP->new->ip() // '127.0.0.1';
+	}               
+);
 
 sub road {
 	my ($self, $base_route, $module) = @_;
 	$base_route = $base_route->full_path();
 
-	my $jedi = use_module($module)->new(jedi_config => $self->config, jedi_base_route => $base_route);
+	my $jedi = use_module($module)->new(jedi_config => $self->config, jedi_base_route => $base_route, jedi_host_ip => $self->host_ip);
 	croak "$module is not a jedi app" unless $jedi->does('Jedi::Role::App');
 	
 	$jedi->jedi_app;
