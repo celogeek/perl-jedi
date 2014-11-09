@@ -275,6 +275,7 @@ test_psgi $jedi->start, sub {
 				'SERVER_PORT' => '80',
 				'PATH_INFO' => '/test/ok',
 			}
+			, 'http://test.com'
 			, 'http://test.com/test/ok'
 		],
 		[ 
@@ -284,6 +285,7 @@ test_psgi $jedi->start, sub {
 				'SERVER_PORT' => '123',
 				'PATH_INFO' => '/test/ok',
 			}
+			, 'http://test.com:123'
 			, 'http://test.com:123/test/ok'
 		],
 		[ 
@@ -293,6 +295,7 @@ test_psgi $jedi->start, sub {
 				'SERVER_PORT' => '443',
 				'PATH_INFO' => '/test/ok',
 			}
+			, 'https://test.com'
 			, 'https://test.com/test/ok'
 		],
 		[ 
@@ -302,13 +305,25 @@ test_psgi $jedi->start, sub {
 				'SERVER_PORT' => '123',
 				'PATH_INFO' => '/test/ok',
 			}
+			, 'https://test.com:123'
 			, 'https://test.com:123/test/ok'
+		],
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'ftp',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '21',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'ftp://test.com:21'
+			, 'ftp://test.com:21/test/ok'
 		],
 	);
 	for my $test(@tests) {
-		my ($env, $url) = @$test;
+		my ($env, $base_url, $url) = @$test;
 		my $req = Jedi::Request->new(env => $env, path => '/');
-		is $req->url, $url, $url . ' ok';
+		is $req->base_url, $base_url, "Base: " . $base_url . ' ok';
+		is $req->url, $url, "Url: " . $url . ' ok';
 	}
 }
 

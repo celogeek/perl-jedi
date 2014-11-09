@@ -1,3 +1,7 @@
+1.006  2014-11-09 16:57:07 GMT
+    * Feature #460 : Add url to Jedi Request (Celogeek San)
+	add also base_url
+
 1.005  2014-11-09 15:45:56 GMT
     * Feature #460 : Add url to Jedi Request (Celogeek San)
     * Feature #459 : Add host_ip to Jedi (Celogeek San)
