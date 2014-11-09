@@ -1,3 +1,4 @@
+    * Feature #458 : handle ipv6 and ipv4 properly (Celogeek San)
     * Bug #457 : Create remote_address_str (Celogeek San)
     * Bug #456 : Fix private range of ips (Celogeek San)
 
