@@ -219,6 +219,15 @@ test_psgi $jedi->start, sub {
             is $res->code, 200, 'status ok';
             is $res->content, 127 * 256 ** 3 + 1, 'ip ok';
         }
+        {
+            my $req = HTTP::Request->new(
+                'GET', '/ip',
+                HTTP::Headers->new('X_FORWARDED_FOR' => '2.3.4.5')
+            );
+            my $res = $cb->($req);
+            is $res->code, 200, 'status ok';
+            is $res->content, 2 * 256 ** 3 + 3 * 256 ** 2 + 4 * 256 + 5, 'ip ok';
+        }
     }
 }
 
