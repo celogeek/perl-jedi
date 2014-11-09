@@ -250,7 +250,7 @@ sub _build__body {
 sub _ip_to_int {
     my ($ip) = @_;
     $ip =~ s/\s+//gx;
-    my @ip_split = split(/\./x, $ip, 4);
+    my @ip_split = split(/\./x, $ip);
     return 0 if @ip_split != 4;
 
     return $ip_split[0] * 256 ** 3 + $ip_split[1] * 256 ** 2 + $ip_split[2] * 256 + $ip_split[3];
@@ -268,6 +268,7 @@ sub _ip_is_public {
     my ($ip) = @_;
     return if !defined $ip;
     my $ip_int = _ip_to_int($ip);
+	return if !$ip_int;
     for my $ip_priv(@private_ips) {
         return if $ip_int >= $ip_priv->[0] && $ip_int <= $ip_priv->[1];
     }
