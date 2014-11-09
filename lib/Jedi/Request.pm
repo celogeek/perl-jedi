@@ -185,14 +185,18 @@ sub host {
 	|| '';
 }
 
-# get Net::IP::XS of the most probable real ip
-has '_real_ip' => (is => 'lazy');
-sub _build__real_ip {
+=attr real_ip
+
+Return a Net::IP::XS representation of the most probable real ip
+
+=cut
+has 'real_ip' => (is => 'lazy');
+sub _build_real_ip {
 	my ($self) = @_;
 
     my $env = $self->env;
     my @possible_forwarded_ips = 
-	grep { $_->iptype !~ /^(?:LOOPBACK|LINK\-LOCAL|PRIVATE|UNIQUE\-LOCAL\-UNICAST|LINK\-LOCAL\-UNICAST)$/xo }
+	grep { $_->iptype !~ /^(?:LOOPBACK|LINK\-LOCAL|PRIVATE|UNIQUE\-LOCAL\-UNICAST|LINK\-LOCAL\-UNICAST|RESERVED)$/xo }
 	grep { defined }
 	map { Net::IP::XS->new($_) } 
 	grep { defined }
@@ -210,28 +214,28 @@ sub _build__real_ip {
 
 =attr remote_address
 
-Return the int version of the remote_address_str
+Return the int version of the real_ip
 
 =cut
 
 has 'remote_address' => (is => 'lazy');
 sub _build_remote_address {
 	my ($self) = @_;
-	my $real_ip = $self->_real_ip
+	my $real_ip = $self->real_ip
 		or return 0;
 	return $real_ip->intip()->bstr();
 }
 
 =attr remote_address_str
 
-Try to find the real ip of the user
+Return the str version of the real_ip
 
 =cut
 
 has 'remote_address_str' => (is => 'lazy');
 sub _build_remote_address_str {
     my ($self) = @_;
-	my $real_ip = $self->_real_ip
+	my $real_ip = $self->real_ip
 		or return '';
 	return $real_ip->ip();
 }

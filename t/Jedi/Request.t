@@ -198,12 +198,13 @@ test_psgi $jedi->start, sub {
                 'GET', '/ip',
                 HTTP::Headers->new('CLIENT_IP' => '11.2.3.4')
             );
+			my $expected = Net::IP::XS->new("11.2.3.4");
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
             is_deeply decode_json($res->content),
 			[
-				11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4,
-				'11.2.3.4'
+				$expected->intip()->bstr(),
+				$expected->ip()
 			], 'ip ok';
         }
         {
@@ -211,23 +212,25 @@ test_psgi $jedi->start, sub {
                 'GET', '/ip',
                 HTTP::Headers->new('X_FORWARDED_FOR' => '10.0.0.1, 127.0.0.1, 11.2.3.4')
             );
+			my $expected = Net::IP::XS->new("11.2.3.4");
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
             is_deeply decode_json($res->content),
 			[
-				11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4,
-				'11.2.3.4'
+				$expected->intip()->bstr(),
+				$expected->ip()
 			], 'ip ok';
         }
         {
             my $req = HTTP::Request->new(
                 'GET', '/ip',
             );
+			my $expected = Net::IP::XS->new("127.0.0.1");
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
             is_deeply decode_json($res->content), [
-				127 * 256 ** 3 + 1,
-				'127.0.0.1'
+				$expected->intip()->bstr(),
+				$expected->ip()
 			], 'ip ok';
         }
         {
@@ -235,12 +238,27 @@ test_psgi $jedi->start, sub {
                 'GET', '/ip',
                 HTTP::Headers->new('X_FORWARDED_FOR' => '2.3.4.5')
             );
+			my $expected = Net::IP::XS->new("2.3.4.5");
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
             is_deeply decode_json($res->content),
 			[
-				2 * 256 ** 3 + 3 * 256 ** 2 + 4 * 256 + 5,
-				'2.3.4.5'
+				$expected->intip()->bstr(),
+				$expected->ip()
+			], 'ip ok';
+        }
+        {
+            my $req = HTTP::Request->new(
+                'GET', '/ip',
+                HTTP::Headers->new('X_FORWARDED_FOR' => '::1,fe00::0,2001:41d0:8:bd54::1')
+            );
+			my $expected = Net::IP::XS->new("2001:41d0:8:bd54::1");
+            my $res = $cb->($req);
+            is $res->code, 200, 'status ok';
+            is_deeply decode_json($res->content),
+			[
+				$expected->intip()->bstr(),
+				$expected->ip()
 			], 'ip ok';
         }
     }
