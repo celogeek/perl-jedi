@@ -5,6 +5,7 @@ use Plack::Test;
 use Jedi;
 use JSON;
 use FindBin qw/$Bin/;
+use Jedi::Request;
 
 my $jedi = Jedi->new();
 $jedi->road('/', 't::lib::request');
@@ -262,6 +263,53 @@ test_psgi $jedi->start, sub {
 			], 'ip ok';
         }
     }
+}
+
+{
+	# Test URL
+	my @tests = (
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'http',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '80',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'http://test.com/test/ok'
+		],
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'http',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '123',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'http://test.com:123/test/ok'
+		],
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'https',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '443',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'https://test.com/test/ok'
+		],
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'https',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '123',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'https://test.com:123/test/ok'
+		],
+	);
+	for my $test(@tests) {
+		my ($env, $url) = @$test;
+		my $req = Jedi::Request->new(env => $env, path => '/');
+		is $req->url, $url, $url . ' ok';
+	}
 }
 
 done_testing;

@@ -240,6 +240,26 @@ sub _build_remote_address_str {
 	return $real_ip->ip();
 }
 
+=attr url
+
+Return the full path of the URL, without the params
+
+=cut
+has 'url' => (is => 'lazy');
+sub _build_url {
+	my ($self) = @_;
+	my $url = $self->scheme . '://' . $self->host;
+	my $port = $self->port;
+	if ($self->scheme eq 'http' && $port ne '80') {
+		$url .= ':' . $port;
+	}
+	if ($self->scheme eq 'https' && $port ne '443') {
+		$url .= ':' . $port;
+	}
+	$url .= $self->env->{PATH_INFO} // '';
+	return $url;
+}
+
 # PRIVATE
 
 has '_body' => (is => 'lazy');
