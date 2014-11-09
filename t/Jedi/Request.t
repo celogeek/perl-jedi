@@ -5,6 +5,7 @@ use Plack::Test;
 use Jedi;
 use JSON;
 use FindBin qw/$Bin/;
+use Jedi::Request;
 
 my $jedi = Jedi->new();
 $jedi->road('/', 't::lib::request');
@@ -198,28 +199,117 @@ test_psgi $jedi->start, sub {
                 'GET', '/ip',
                 HTTP::Headers->new('CLIENT_IP' => '11.2.3.4')
             );
+			my $expected = Net::IP::XS->new("11.2.3.4");
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
-            is $res->content, 11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4, 'ip ok';
+            is_deeply decode_json($res->content),
+			[
+				$expected->intip()->bstr(),
+				$expected->ip()
+			], 'ip ok';
         }
         {
             my $req = HTTP::Request->new(
                 'GET', '/ip',
                 HTTP::Headers->new('X_FORWARDED_FOR' => '10.0.0.1, 127.0.0.1, 11.2.3.4')
             );
+			my $expected = Net::IP::XS->new("11.2.3.4");
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
-            is $res->content, 11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4, 'ip ok';
+            is_deeply decode_json($res->content),
+			[
+				$expected->intip()->bstr(),
+				$expected->ip()
+			], 'ip ok';
         }
         {
             my $req = HTTP::Request->new(
                 'GET', '/ip',
             );
+			my $expected = Net::IP::XS->new("127.0.0.1");
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
-            is $res->content, 127 * 256 ** 3 + 1, 'ip ok';
+            is_deeply decode_json($res->content), [
+				$expected->intip()->bstr(),
+				$expected->ip()
+			], 'ip ok';
+        }
+        {
+            my $req = HTTP::Request->new(
+                'GET', '/ip',
+                HTTP::Headers->new('X_FORWARDED_FOR' => '2.3.4.5')
+            );
+			my $expected = Net::IP::XS->new("2.3.4.5");
+            my $res = $cb->($req);
+            is $res->code, 200, 'status ok';
+            is_deeply decode_json($res->content),
+			[
+				$expected->intip()->bstr(),
+				$expected->ip()
+			], 'ip ok';
+        }
+        {
+            my $req = HTTP::Request->new(
+                'GET', '/ip',
+                HTTP::Headers->new('X_FORWARDED_FOR' => '::1,fe00::0,2001:41d0:8:bd54::1')
+            );
+			my $expected = Net::IP::XS->new("2001:41d0:8:bd54::1");
+            my $res = $cb->($req);
+            is $res->code, 200, 'status ok';
+            is_deeply decode_json($res->content),
+			[
+				$expected->intip()->bstr(),
+				$expected->ip()
+			], 'ip ok';
         }
     }
+}
+
+{
+	# Test URL
+	my @tests = (
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'http',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '80',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'http://test.com/test/ok'
+		],
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'http',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '123',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'http://test.com:123/test/ok'
+		],
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'https',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '443',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'https://test.com/test/ok'
+		],
+		[ 
+			{
+				'PSGI.URL_SCHEME' => 'https',
+				'HTTP_HOST' => 'test.com',
+				'SERVER_PORT' => '123',
+				'PATH_INFO' => '/test/ok',
+			}
+			, 'https://test.com:123/test/ok'
+		],
+	);
+	for my $test(@tests) {
+		my ($env, $url) = @$test;
+		my $req = Jedi::Request->new(env => $env, path => '/');
+		is $req->url, $url, $url . ' ok';
+	}
 }
 
 done_testing;

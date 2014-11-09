@@ -1,3 +1,10 @@
+1.005  2014-11-09 15:45:56 GMT
+    * Feature #460 : Add url to Jedi Request (Celogeek San)
+    * Feature #459 : Add host_ip to Jedi (Celogeek San)
+    * Feature #458 : handle ipv6 and ipv4 properly (Celogeek San)
+    * Bug #457 : Create remote_address_str (Celogeek San)
+    * Bug #456 : Fix private range of ips (Celogeek San)
+
 1.004  2014-03-29 17:56:11 GMT
     * Feature #421 : Add jedi_base_route method, useful for template (Celogeek San)
 

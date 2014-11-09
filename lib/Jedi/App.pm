@@ -125,6 +125,15 @@ You can access to it with the 'jedi_config' attribute :
   # ... 
  }
 
+=head1 SERVER HOST IP
+
+To get the server host ip, use the method 'jedi_host_ip' :
+
+ sub jedi_app {
+  my ($app) = @_;
+  say "Server Host IP : ", $app->jedi_host_ip;
+ }
+
 =head1 THE REPONSE
 
 Each route will call your method with : ($app, $request, $response).

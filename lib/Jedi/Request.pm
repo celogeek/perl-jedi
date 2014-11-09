@@ -18,6 +18,7 @@ use warnings;
 use HTTP::Body;
 use CGI::Deurl::XS 'parse_query_string';
 use CGI::Cookie::XS;
+use Net::IP::XS;
 
 # MOO PACKAGE
 use Moo;
@@ -184,30 +185,79 @@ sub host {
 	|| '';
 }
 
+=attr real_ip
+
+Return a Net::IP::XS representation of the most probable real ip
+
+=cut
+has 'real_ip' => (is => 'lazy');
+sub _build_real_ip {
+	my ($self) = @_;
+
+    my $env = $self->env;
+    my @possible_forwarded_ips = 
+	grep { $_->iptype !~ /^(?:LOOPBACK|LINK\-LOCAL|PRIVATE|UNIQUE\-LOCAL\-UNICAST|LINK\-LOCAL\-UNICAST|RESERVED)$/xo }
+	grep { defined }
+	map { Net::IP::XS->new($_) } 
+	grep { defined }
+	(
+                $env->{'HTTP_CLIENT_IP'},
+                split(/,\s*/xo, $env->{'HTTP_X_FORWARDED_FOR'} // ''),
+                $env->{'HTTP_X_FORWARDED'},
+                $env->{'HTTP_X_CLUSTER_CLIENT_IP'},
+                $env->{'HTTP_FORWARDED_FOR'},
+                $env->{'HTTP_FORWARDED'},
+    );
+
+	return $possible_forwarded_ips[0] // Net::IP::XS->new($env->{'REMOTE_ADDR'} // '');
+}
+
 =attr remote_address
 
-Try to find the real ip of the user and return the int number of it
+Return the int version of the real_ip
 
 =cut
 
 has 'remote_address' => (is => 'lazy');
 sub _build_remote_address {
-    my ($self) = @_;
-    my $env = $self->env;
-    my @possible_ips = (
-        ( grep { _ip_is_public($_) } (
-                $env->{'HTTP_CLIENT_IP'},
-                split(/,/x, $env->{'HTTP_X_FORWARDED_FOR'} // ''),
-                $env->{'HTTP_X_FORWARDED'},
-                $env->{'HTTP_X_CLUSTER_CLIENT_IP'},
-                $env->{'HTTP_FORWARDED_FOR'},
-                $env->{'HTTP_FORWARDED'}
-            )
-        ),
-        $env->{'REMOTE_ADDR'}
-    );
+	my ($self) = @_;
+	my $real_ip = $self->real_ip
+		or return 0;
+	return $real_ip->intip()->bstr();
+}
 
-    return _ip_to_int($possible_ips[0] // '');
+=attr remote_address_str
+
+Return the str version of the real_ip
+
+=cut
+
+has 'remote_address_str' => (is => 'lazy');
+sub _build_remote_address_str {
+    my ($self) = @_;
+	my $real_ip = $self->real_ip
+		or return '';
+	return $real_ip->ip();
+}
+
+=attr url
+
+Return the full path of the URL, without the params
+
+=cut
+has 'url' => (is => 'lazy');
+sub _build_url {
+	my ($self) = @_;
+	my $url = $self->scheme . '://' . $self->host;
+	my $port = $self->port;
+	if ($self->scheme eq 'http' && $port ne '80') {
+		$url .= ':' . $port;
+	}
+	if ($self->scheme eq 'https' && $port ne '443') {
+		$url .= ':' . $port;
+	}
+	$url .= $self->env->{PATH_INFO} // '';
+	return $url;
 }
 
 # PRIVATE
@@ -231,33 +281,4 @@ sub _build__body {
   return $body;
 }
 
-sub _ip_to_int {
-    my ($ip) = @_;
-    $ip =~ s/\s+//gx;
-    my @ip_split = split(/\./x, $ip, 4);
-    return 0 if @ip_split != 4;
-
-    return $ip_split[0] * 256 ** 3 + $ip_split[1] * 256 ** 2 + $ip_split[2] * 256 + $ip_split[3];
-}
-
-my @private_ips = map { [map{_ip_to_int($_)} @$_] } (
-    ['0.0.0.0','2.255.255.255'],
-    ['10.0.0.0','10.255.255.255'],
-    ['127.0.0.0','127.255.255.255'],
-    ['169.254.0.0','169.254.255.255'],
-    ['172.16.0.0','172.31.255.255'],
-    ['192.0.2.0','192.0.2.255'],
-    ['192.168.0.0','192.168.255.255'],
-    ['255.255.255.0','255.255.255.255'],
-);
-
-sub _ip_is_public {
-    my ($ip) = @_;
-    return if !defined $ip;
-    my $ip_int = _ip_to_int($ip);
-    for my $ip_priv(@private_ips) {
-        return if $ip_int >= $ip_priv->[0] && $ip_int <= $ip_priv->[1];
-    }
-    return 1;
-}
 1;
