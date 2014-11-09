@@ -221,7 +221,6 @@ sub _build_remote_address_str {
 
 	my $ip = shift @possible_ips;
 	$ip //= '';
-	$ip =~ s/\s+//gx;
 
 	return $ip;
 }
