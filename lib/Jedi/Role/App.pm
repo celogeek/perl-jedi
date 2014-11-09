@@ -42,6 +42,7 @@ sub _jedi_routes_push {
 
 has 'jedi_config' => (is => 'ro', default => sub {{}});
 has 'jedi_base_route' => (is => 'ro');
+has 'jedi_host_ip' => (is => 'ro');
 
 # PUBLIC METHODS
 

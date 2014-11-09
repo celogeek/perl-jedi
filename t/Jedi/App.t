@@ -195,4 +195,17 @@ use Jedi;
   };
 }
 
+{
+  my $jedi = Jedi->new();
+  $jedi->road('/', 't::lib::hostip');
+  test_psgi $jedi->start, sub {
+    my ($cb) = shift;
+    {
+      my $res = $cb->(GET '/');
+      is $res->code, 200, 'route is correct';
+      is $res->content, $jedi->host_ip, '... and body set';
+    }
+  };
+}
+
 done_testing;
