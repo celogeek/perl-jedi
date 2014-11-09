@@ -200,7 +200,11 @@ test_psgi $jedi->start, sub {
             );
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
-            is $res->content, 11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4, 'ip ok';
+            is_deeply decode_json($res->content),
+			[
+				11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4,
+				'11.2.3.4'
+			], 'ip ok';
         }
         {
             my $req = HTTP::Request->new(
@@ -209,7 +213,11 @@ test_psgi $jedi->start, sub {
             );
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
-            is $res->content, 11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4, 'ip ok';
+            is_deeply decode_json($res->content),
+			[
+				11 * 256 ** 3 + 2 * 256 ** 2 + 3 * 256 + 4,
+				'11.2.3.4'
+			], 'ip ok';
         }
         {
             my $req = HTTP::Request->new(
@@ -217,7 +225,10 @@ test_psgi $jedi->start, sub {
             );
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
-            is $res->content, 127 * 256 ** 3 + 1, 'ip ok';
+            is_deeply decode_json($res->content), [
+				127 * 256 ** 3 + 1,
+				'127.0.0.1'
+			], 'ip ok';
         }
         {
             my $req = HTTP::Request->new(
@@ -226,7 +237,11 @@ test_psgi $jedi->start, sub {
             );
             my $res = $cb->($req);
             is $res->code, 200, 'status ok';
-            is $res->content, 2 * 256 ** 3 + 3 * 256 ** 2 + 4 * 256 + 5, 'ip ok';
+            is_deeply decode_json($res->content),
+			[
+				2 * 256 ** 3 + 3 * 256 ** 2 + 4 * 256 + 5,
+				'2.3.4.5'
+			], 'ip ok';
         }
     }
 }

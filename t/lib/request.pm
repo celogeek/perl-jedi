@@ -75,7 +75,7 @@ sub handle_port {
 sub handle_remote_addr {
     my ($jedi, $request, $response) = @_;
     $response->status(200);
-    $response->body($request->remote_address);
+    $response->body(encode_json([$request->remote_address,$request->remote_address_str]));
     return 1;
 }
 1;

@@ -186,12 +186,24 @@ sub host {
 
 =attr remote_address
 
-Try to find the real ip of the user and return the int number of it
+Return the int version of the remote_address_str
 
 =cut
 
 has 'remote_address' => (is => 'lazy');
 sub _build_remote_address {
+	my ($self) = @_;
+    return _ip_to_int($self->remote_address_str);
+}
+
+=attr remote_address_str
+
+Try to find the real ip of the user
+
+=cut
+
+has 'remote_address_str' => (is => 'lazy');
+sub _build_remote_address_str {
     my ($self) = @_;
     my $env = $self->env;
     my @possible_ips = (
@@ -207,7 +219,11 @@ sub _build_remote_address {
         $env->{'REMOTE_ADDR'}
     );
 
-    return _ip_to_int($possible_ips[0] // '');
+	my $ip = shift @possible_ips;
+	$ip //= '';
+	$ip =~ s/\s+//gx;
+
+	return $ip;
 }
 
 # PRIVATE
