@@ -143,7 +143,8 @@ sub _build_cookies {
 Return the scheme from proxied proto or main proto
 
 =cut
-sub scheme {
+has 'scheme' => (is => 'lazy');
+sub _build_scheme {
 	my ($self) = @_;
 	my $env = $self->env;
 
@@ -157,24 +158,13 @@ sub scheme {
       	|| '';
 }
 
-=method port
+=method base_host
 
-Return server port
-
-=cut
-sub port {
-	my ($self) = @_;
-	my $env = $self->env;
-
-	return $env->{'SERVER_PORT'};	
-}
-
-=method host
-
-Return the proxied host or the main host
+Return the host:port proxied or real
 
 =cut
-sub host {
+has 'base_host' => (is => 'lazy');
+sub _build_base_host {
 	my ($self) = @_;
 	my $env = $self->env;
 
@@ -183,6 +173,35 @@ sub host {
 	|| $env->{'X_FORWARDED_HOST'}
 	|| $env->{'HTTP_HOST'}
 	|| '';
+}
+
+=method port
+
+Return the port part of the base_host
+
+If no port found, it will return the default port based on scheme
+
+=cut
+has 'port' => (is => 'lazy');
+sub _build_port {
+	my ($self) = @_;
+	my ($host, $port) = split(/:/, $self->base_host);
+	return $port if defined $port;
+	return 80 if $self->scheme eq 'http';
+	return 443 if $self->scheme eq 'https';
+	return '';
+}
+
+=method host
+
+Return the host part of the base_host
+
+=cut
+has 'host' => (is => 'lazy');
+sub _build_host {
+	my ($self) = @_;
+	my ($host, $port) = split(/:/, $self->base_host);
+	return $host;
 }
 
 =attr real_ip
@@ -248,17 +267,7 @@ Return the path path of the URL, without the params
 has 'base_url' => (is => 'lazy');
 sub _build_base_url {
 	my ($self) = @_;
-	my $base_url = $self->scheme . '://' . $self->host;
-	my $port = ':' . $self->port;
-	if ($self->scheme eq 'http' && $port eq ':80') {
-		$port = '';
-	}
-   	if ($self->scheme eq 'https' && $port eq ':443') {
-		$port = '';
-	}
-	$base_url .= $port;
-
-	return $base_url;
+	return $self->scheme . '://' . $self->base_host;
 }
 =attr url
 
