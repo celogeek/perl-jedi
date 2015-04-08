@@ -1,3 +1,5 @@
+    * Bug #485 : Remove MinimumPerl (Celogeek San)
+
 1.007  2014-11-11 06:40:07 GMT
     * Feature #460 : Add url to Jedi Request (Celogeek San)
 	fix base_url: host contain the server port, we don't need to take SERVER_PORT
